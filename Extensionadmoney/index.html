@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PVA Bazaar Universal Stream Embed</title>
+    <meta
+      name="description"
+      content="Universal, owner-controlled Twitch stream embed for the ricktaur channel."
+    />
+
+    <!-- Tailwind via CDN for rapid iteration; can be swapped for precompiled later -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Tailwind dark mode configuration
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              twitch: "#9146FF",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      /* Maintain 16:9 aspect ratio for the player container */
+      .embed-aspect-16-9 {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+      }
+
+      .embed-aspect-16-9 iframe,
+      .embed-aspect-16-9 .embed-overlay-layer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .embed-overlay-layer {
+        pointer-events: none;
+      }
+
+      .embed-overlay-layer .embed-cta {
+        pointer-events: auto;
+      }
+    </style>
+  </head>
+
+  <body class="bg-black text-gray-100 min-h-screen flex items-center justify-center">
+    <main
+      id="embed-root"
+      class="w-full max-w-5xl mx-auto px-4 py-6"
+      aria-label="PVA Bazaar Universal Stream Embed"
+    >
+      <!-- Loading / status messages -->
+      <section
+        id="embed-status"
+        class="mb-4 flex items-center justify-between text-xs sm:text-sm text-gray-400"
+        aria-live="polite"
+      >
+        <span id="embed-status-message">Initializing stream embed…</span>
+        <span id="embed-domain" class="hidden sm:inline-block"></span>
+      </section>
+
+      <!-- Core embed container -->
+      <section
+        id="embed-container"
+        class="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 overflow-hidden"
+      >
+        <div class="embed-aspect-16-9 bg-neutral-950">
+          <!-- Twitch player / offline state will be injected here -->
+          <div
+            id="embed-player-shell"
+            class="w-full h-full flex items-center justify-center"
+          >
+            <div class="flex flex-col items-center gap-3 text-center px-4">
+              <div
+                class="w-10 h-10 border-4 border-t-transparent border-twitch rounded-full animate-spin"
+                aria-hidden="true"
+              ></div>
+              <p class="text-sm text-gray-300">
+                Preparing the <span class="font-semibold text-twitch">ricktaur</span> stream
+                experience…
+              </p>
+            </div>
+          </div>
+
+          <!-- Overlay layer for CTAs / alerts (non-intrusive, pointer-events managed via CSS) -->
+          <div
+            id="embed-overlay-layer"
+            class="embed-overlay-layer flex items-end justify-end p-3"
+          >
+            <button
+              id="embed-primary-cta"
+              class="embed-cta inline-flex items-center gap-1 rounded-full bg-twitch/90 hover:bg-twitch text-white text-xs sm:text-sm font-semibold px-3 py-1.5 shadow-lg shadow-twitch/40 transition"
+              type="button"
+            >
+              <span>Support the stream</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Footer: monetization + disclosures live here -->
+        <footer
+          id="embed-footer"
+          class="px-4 py-3 flex flex-col gap-3 bg-neutral-950 border-t border-neutral-800 text-xs sm:text-sm"
+        >
+          <div class="flex flex-col lg:flex-row gap-3 lg:items-start lg:justify-between">
+            <!-- Affiliate carousel -->
+            <div class="flex-1 min-w-[240px]">
+              <h2 class="font-semibold text-gray-100 text-xs sm:text-sm mb-1">
+                Featured gear from the ricktaur setup
+              </h2>
+              <div
+                id="affiliate-carousel"
+                class="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900/60 p-2 sm:p-3"
+              >
+                <div
+                  id="affiliate-image-shell"
+                  class="w-24 h-16 sm:w-28 sm:h-20 rounded-md bg-neutral-800 flex items-center justify-center text-[10px] text-gray-500"
+                >
+                  Loading…
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div
+                    id="affiliate-title"
+                    class="font-medium text-gray-100 text-xs sm:text-sm truncate"
+                  >
+                    &nbsp;
+                  </div>
+                  <div
+                    id="affiliate-price"
+                    class="text-[11px] sm:text-xs text-gray-400 mt-0.5"
+                  >
+                    &nbsp;
+                  </div>
+                  <button
+                    id="affiliate-cta"
+                    type="button"
+                    class="mt-2 inline-flex items-center gap-1 rounded-full bg-neutral-100 text-black px-3 py-1 text-[11px] sm:text-xs font-semibold hover:bg-white transition"
+                  >
+                    View deal
+                  </button>
+                </div>
+              </div>
+              <p class="mt-1 text-[10px] text-gray-500">
+                Contains affiliate links. As an Amazon Associate, qualifying purchases may earn
+                commissions.
+              </p>
+            </div>
+
+            <!-- Donation goal / Tip Jar -->
+            <div class="w-full max-w-xs">
+              <h2 class="font-semibold text-gray-100 text-xs sm:text-sm mb-1">
+                Support the stream
+              </h2>
+              <div class="rounded-lg border border-neutral-800 bg-neutral-900/60 p-3 space-y-2">
+                <div
+                  id="donation-goal-label"
+                  class="text-[11px] sm:text-xs text-gray-300 font-medium"
+                >
+                  &nbsp;
+                </div>
+                <div class="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
+                  <div
+                    id="donation-goal-progress"
+                    class="h-full bg-twitch rounded-full"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <div
+                  id="donation-goal-amounts"
+                  class="text-[11px] sm:text-xs text-gray-400"
+                >
+                  &nbsp;
+                </div>
+                <button
+                  id="open-tip-jar"
+                  type="button"
+                  class="mt-1 inline-flex items-center justify-center w-full rounded-full bg-twitch/90 hover:bg-twitch text-white text-[11px] sm:text-xs font-semibold px-3 py-1.5 shadow shadow-twitch/40 transition"
+                >
+                  Open Tip Jar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sponsors row -->
+          <div
+            id="sponsor-row"
+            class="flex flex-wrap items-center gap-2 border-t border-neutral-800 pt-2 mt-1"
+          >
+            <span class="text-[10px] text-gray-500 mr-1">Partners:</span>
+            <!-- Sponsor slots will be injected here -->
+          </div>
+        </footer>
+      </section>
+    </main>
+
+    <!-- Tip Jar Modal -->
+    <div
+      id="tip-jar-backdrop"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 z-40 hidden"
+      aria-hidden="true"
+    >
+      <div
+        class="w-full max-w-sm rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl shadow-black/60 p-4 sm:p-5"
+      >
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h2 class="text-sm sm:text-base font-semibold text-gray-50">
+              Tip Jar for ricktaur
+            </h2>
+            <p class="text-[11px] sm:text-xs text-gray-400 mt-0.5">
+              Choose a secure provider below. Donor names are optional and can remain private.
+            </p>
+          </div>
+          <button
+            id="close-tip-jar"
+            type="button"
+            class="text-gray-400 hover:text-gray-200 text-sm"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div id="tip-jar-providers" class="space-y-2 text-xs sm:text-sm"></div>
+
+        <p class="mt-3 text-[10px] text-gray-500">
+          Payments are processed by third-party providers (e.g., PayPal, Stripe). No card data is
+          stored by this embed.
+        </p>
+      </div>
+    </div>
+
+    <!-- Cookie consent banner -->
+    <div
+      id="cookie-consent-banner"
+      class="fixed inset-x-0 bottom-0 z-30 flex justify-center px-3 pb-3 hidden"
+    >
+      <div
+        class="w-full max-w-3xl rounded-2xl bg-neutral-950/95 border border-neutral-800 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 text-[11px] sm:text-xs text-gray-200"
+      >
+        <div class="flex-1">
+          <span class="font-semibold text-gray-50">Analytics & research cookies</span>
+          <span class="block mt-0.5 text-gray-300">
+            This embed logs anonymized usage data to support PhD research and improve the viewing
+            experience. No personal identifiers are collected.
+          </span>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button
+            id="cookie-decline"
+            type="button"
+            class="px-3 py-1.5 rounded-full border border-neutral-700 text-gray-200 hover:bg-neutral-800"
+          >
+            Decline
+          </button>
+          <button
+            id="cookie-accept"
+            type="button"
+            class="px-3 py-1.5 rounded-full bg-twitch/90 hover:bg-twitch text-white font-semibold"
+          >
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core embed engine -->
+    <script src="./embed-engine.js" type="module"></script>
+  </body>
+</html>
+

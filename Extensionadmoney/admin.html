@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PVA Bazaar Stream Admin (Preview)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-black text-gray-100 min-h-screen">
+    <main class="max-w-5xl mx-auto px-4 py-6 space-y-4">
+      <header class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-semibold">PVA Bazaar Stream Admin</h1>
+          <p class="text-xs text-gray-400 mt-1">
+            Preview of the future revenue & research dashboard. Authentication and data wiring will
+            be added in a later phase.
+          </p>
+        </div>
+        <span class="text-[11px] px-2 py-1 rounded-full bg-neutral-900 border border-neutral-700">
+          Read-only preview
+        </span>
+      </header>
+
+      <section class="grid gap-3 sm:grid-cols-3 text-xs">
+        <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-3">
+          <div class="text-gray-400 mb-1">Estimated monthly revenue</div>
+          <div class="text-lg font-semibold">$0.00</div>
+          <p class="mt-1 text-[11px] text-gray-500">
+            Placeholder. Will aggregate affiliate, donations, and sponsor data.
+          </p>
+        </div>
+        <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-3">
+          <div class="text-gray-400 mb-1">Affiliate clicks (30d)</div>
+          <div class="text-lg font-semibold">0</div>
+          <p class="mt-1 text-[11px] text-gray-500">
+            Driven by <code>affiliate_click</code> events from the embed.
+          </p>
+        </div>
+        <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-3">
+          <div class="text-gray-400 mb-1">Donation initiations (30d)</div>
+          <div class="text-lg font-semibold">0</div>
+          <p class="mt-1 text-[11px] text-gray-500">
+            Driven by <code>donation_initiated</code> events.
+          </p>
+        </div>
+      </section>
+
+      <section class="rounded-xl border border-neutral-800 bg-neutral-950 p-4 text-xs">
+        <h2 class="text-sm font-semibold mb-2">Research logging overview</h2>
+        <p class="text-gray-300 mb-2">
+          This admin view will surface anonymized metrics only. No IP addresses, usernames, or
+          emails will be visible here, in alignment with research ethics requirements.
+        </p>
+        <ul class="list-disc list-inside text-gray-400 space-y-1">
+          <li>Embed load counts by domain</li>
+          <li>Affiliate click-through rates per product</li>
+          <li>Donation funnel performance per provider</li>
+          <li>A/B test variant performance (e.g., CTA color)</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
+

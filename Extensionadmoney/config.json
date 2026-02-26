@@ -1,0 +1,90 @@
+{
+  "version": "1.0.0",
+  "embed": {
+    "channel": "ricktaur",
+    "autoplay": true,
+    "muted": true,
+    "chatEnabled": true,
+    "themeColor": "#9146FF",
+    "offlineMessage": "Catch the next stream at 8 PM EST!",
+    "showAffiliateCarousel": true
+  },
+  "twitch": {
+    "apiBaseUrl": "https://api.twitch.tv/helix",
+    "channel": "ricktaur",
+    "clientId": "YOUR_TWITCH_CLIENT_ID",
+    "statusProxyEndpoint": "/.netlify/functions/stream-status"
+  },
+  "chat": {
+    "enabled": true,
+    "keywordFilter": [
+      "example-slur",
+      "spam-link"
+    ]
+  },
+  "analytics": {
+    "loggingEnabled": true,
+    "beaconEndpoint": "/.netlify/functions/log",
+    "cookieConsentRequired": true
+  },
+  "monetization": {
+    "affiliate": {
+      "utmSource": "embed",
+      "utmMedium": "affiliate",
+      "utmCampaign": "ricktaur",
+      "rotationSeconds": 60,
+      "products": [
+        {
+          "id": "keyboard-pro",
+          "title": "Pro Mechanical Keyboard",
+          "image": "https://via.placeholder.com/120x80?text=Keyboard",
+          "price": "$129",
+          "url": "https://example.com/keyboard?tag=ricktaur"
+        },
+        {
+          "id": "mic-bundle",
+          "title": "Streaming Mic Bundle",
+          "image": "https://via.placeholder.com/120x80?text=Mic",
+          "price": "$199",
+          "url": "https://example.com/mic?tag=ricktaur"
+        }
+      ]
+    },
+    "donations": {
+      "goalLabel": "New Camera Fund",
+      "goalCurrent": 500,
+      "goalTarget": 1000,
+      "providers": [
+        {
+          "id": "paypal",
+          "label": "Tip via PayPal",
+          "url": "https://www.paypal.com/paypalme/your-handle"
+        },
+        {
+          "id": "stripe",
+          "label": "Tip with Card (Stripe)",
+          "url": "https://buy.stripe.com/test_placeholder"
+        }
+      ]
+    },
+    "sponsors": {
+      "slots": [
+        {
+          "id": "pva-bazaar",
+          "name": "PVA Bazaar",
+          "logo": "https://via.placeholder.com/120x40?text=PVA",
+          "url": "https://pvabazaar.com",
+          "active": true
+        },
+        {
+          "id": "example-sponsor",
+          "name": "Example Sponsor",
+          "logo": "https://via.placeholder.com/120x40?text=Sponsor",
+          "url": "https://example.com",
+          "active": false
+        }
+      ]
+    }
+  }
+}
+
