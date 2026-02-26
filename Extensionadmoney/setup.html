@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PVA Bazaar – Setup & Connect</title>
-    <meta name="description" content="One-time setup wizard to connect all PVA Bazaar pages to your Twitch channel." />
+    <title>PVA Bazaar – Setup &amp; Connect</title>
+    <meta name="description" content="Enter all your info once and every page connects to your Twitch channel automatically." />
     <meta name="robots" content="noindex" />
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,186 +18,376 @@
       :root { color-scheme: dark; }
       .spin { animation: spin 0.8s linear infinite; }
       @keyframes spin { to { transform: rotate(360deg); } }
-      .pulse-once { animation: pulse-once 0.4s ease; }
-      @keyframes pulse-once { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+      .section-card { transition: border-color 0.2s; }
+      .section-card:focus-within { border-color: #9146FF40; }
+      input, textarea, select {
+        background: #171717;
+        border: 1px solid #404040;
+        color: #f3f4f6;
+        border-radius: 0.5rem;
+        padding: 0.4rem 0.65rem;
+        font-size: 0.875rem;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      input:focus, textarea:focus, select:focus { border-color: #9146FF; }
+      input::placeholder, textarea::placeholder { color: #525252; }
+      label { font-size: 0.75rem; font-weight: 500; color: #d1d5db; display: block; margin-bottom: 0.25rem; }
+      .field { margin-bottom: 0.85rem; }
+      .section-title {
+        font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.07em; color: #9ca3af; margin-bottom: 0.75rem;
+        display: flex; align-items: center; gap: 0.5rem;
+      }
+      .dot-live { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; }
+      .dot-warn { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; }
     </style>
   </head>
 
-  <body class="bg-black text-gray-100 min-h-screen flex items-center justify-center px-4 py-10">
-    <div class="w-full max-w-lg space-y-6">
+  <body class="bg-black text-gray-100 min-h-screen px-4 py-10">
+    <div class="w-full max-w-2xl mx-auto space-y-5">
 
       <!-- Header -->
-      <div class="text-center space-y-1">
-        <div class="inline-flex items-center gap-2 text-twitch font-bold text-2xl">
-          <span class="w-3 h-3 rounded-full bg-twitch inline-block"></span>
-          PVA Bazaar
-        </div>
-        <h1 class="text-xl font-bold text-gray-50">Connect Everything</h1>
-        <p class="text-sm text-gray-400">Enter your Twitch credentials once. Every page and widget will instantly know when you're live.</p>
+      <div class="text-center space-y-1 pb-2">
+        <a href="/" class="inline-flex items-center gap-2 text-twitch font-bold text-xl hover:opacity-80 transition">
+          <span class="w-2.5 h-2.5 rounded-full bg-twitch inline-block"></span>PVA Bazaar
+        </a>
+        <h1 class="text-2xl font-bold text-gray-50">Setup &amp; Connect</h1>
+        <p class="text-sm text-gray-400 max-w-md mx-auto">
+          Enter all your info once here — every page, widget, and embed automatically uses it.
+        </p>
       </div>
 
-      <!-- Status card (shown after page loads) -->
-      <div id="status-card" class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4 hidden">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="text-xs font-semibold text-gray-300 uppercase tracking-wide">Current Status</span>
-        </div>
-        <div id="status-rows" class="space-y-2 text-sm"></div>
+      <!-- ── Current Status Banner ───────────────────────────────────────────── -->
+      <div id="status-banner" class="hidden rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3">
+        <div class="section-title"><span class="dot-live"></span> Current Status</div>
+        <div id="status-rows" class="grid sm:grid-cols-2 gap-1 text-sm"></div>
       </div>
 
-      <!-- Form card -->
-      <div class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-200">Twitch Credentials
+      <!-- ── SECTION 1: Twitch Credentials ─────────────────────────────────── -->
+      <div class="section-card rounded-2xl border border-neutral-800 bg-neutral-900/40 p-5">
+        <div class="section-title">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+          Twitch Connection
           <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer"
-             class="ml-2 text-[11px] text-twitch hover:underline font-normal">Get them free at dev.twitch.tv ↗</a>
-        </h2>
+             class="ml-auto text-[11px] text-twitch hover:underline font-normal normal-case tracking-normal">
+            Get credentials free ↗
+          </a>
+        </div>
 
-        <!-- Step guide -->
-        <details class="text-xs text-gray-400 rounded-lg border border-neutral-800 bg-neutral-950/60">
-          <summary class="px-3 py-2 cursor-pointer hover:text-gray-200 font-medium select-none">
-            How to get your Client ID & Secret (3 steps) ▸
+        <details class="mb-4 rounded-lg border border-neutral-800 bg-neutral-950/60 text-xs text-gray-400">
+          <summary class="px-3 py-2 cursor-pointer hover:text-gray-200 select-none font-medium">
+            How to get Client ID &amp; Secret (3 quick steps) ▸
           </summary>
           <ol class="px-4 pb-3 pt-1 space-y-1.5 list-decimal list-inside">
-            <li>Go to <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer" class="text-twitch underline">dev.twitch.tv/console/apps</a> and sign in with your Twitch account.</li>
-            <li>Click <strong class="text-gray-200">Register Your Application</strong>. Name it anything (e.g. "PVA Bazaar"). Set OAuth Redirect URL to <code class="bg-neutral-800 px-1 rounded">https://localhost</code>. Category: <strong class="text-gray-200">Website Integration</strong>.</li>
-            <li>After saving, click <strong class="text-gray-200">Manage</strong> → copy the <strong class="text-gray-200">Client ID</strong>. Click <strong class="text-gray-200">New Secret</strong> → copy the <strong class="text-gray-200">Client Secret</strong>. Paste both below.</li>
+            <li>Go to <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer" class="text-twitch underline">dev.twitch.tv/console/apps</a> — sign in with your Twitch account.</li>
+            <li>Click <strong class="text-gray-200">Register Your Application</strong>. Name: anything (e.g. "PVA Bazaar"). OAuth Redirect URL: <code class="bg-neutral-800 px-1 rounded">https://localhost</code>. Category: <strong class="text-gray-200">Website Integration</strong>. Click Create.</li>
+            <li>Click <strong class="text-gray-200">Manage</strong> → copy <strong class="text-gray-200">Client ID</strong>. Click <strong class="text-gray-200">New Secret</strong> → copy <strong class="text-gray-200">Client Secret</strong>. Paste both below.</li>
           </ol>
         </details>
 
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs font-medium text-gray-300 mb-1">Twitch Client ID <span class="text-red-400">*</span></label>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="field">
+            <label>Twitch Client ID <span class="text-red-400">*</span></label>
             <input id="f-client-id" type="text" autocomplete="off" spellcheck="false"
-                   placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                   class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+                   placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
           </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-300 mb-1">Twitch Client Secret <span class="text-red-400">*</span></label>
+          <div class="field">
+            <label>Twitch Client Secret <span class="text-red-400">*</span></label>
             <div class="relative">
               <input id="f-client-secret" type="password" autocomplete="off" spellcheck="false"
-                     placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                     class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 pr-16 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+                     placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="padding-right:3rem" />
               <button id="toggle-secret" type="button"
-                      class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 hover:text-gray-200">Show</button>
+                      class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 hover:text-gray-200">
+                Show
+              </button>
             </div>
           </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-300 mb-1">Twitch Channel <span class="text-red-400">*</span></label>
+          <div class="field">
+            <label>Your Twitch Channel <span class="text-red-400">*</span></label>
             <input id="f-channel" type="text" autocomplete="off" spellcheck="false"
-                   value="ricktaur"
-                   class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+                   value="ricktaur" placeholder="yourchannelname" />
+          </div>
+          <div class="field">
+            <label>Offline Message
+              <span class="text-gray-500 font-normal">— shown when you're not live</span>
+            </label>
+            <input id="f-offline-msg" type="text" placeholder="Catch the next stream at 8 PM EST!" />
           </div>
         </div>
+      </div>
 
-        <hr class="border-neutral-800" />
-
-        <details>
-          <summary class="text-xs font-medium text-gray-400 cursor-pointer hover:text-gray-200 select-none">
-            Optional: Notifications &amp; Discord ▸
-          </summary>
-          <div class="mt-3 space-y-3">
-            <div>
-              <label class="block text-xs font-medium text-gray-300 mb-1">Notify Secret
-                <span class="text-gray-500 font-normal">– protects your Go-Live button endpoint</span>
-              </label>
-              <input id="f-notify-secret" type="text" autocomplete="off" spellcheck="false"
-                     placeholder="any random string (e.g. my-secret-123)"
-                     class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-300 mb-1">Discord Webhook URL
-                <span class="text-gray-500 font-normal">– get from Discord Server Settings → Integrations</span>
-              </label>
-              <input id="f-discord" type="url" autocomplete="off" spellcheck="false"
-                     placeholder="https://discord.com/api/webhooks/..."
-                     class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
-            </div>
+      <!-- ── SECTION 2: Tip Jar / Donations ────────────────────────────────── -->
+      <div class="section-card rounded-2xl border border-neutral-800 bg-neutral-900/40 p-5">
+        <div class="section-title">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          Tip Jar &amp; Donations
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="field">
+            <label>Goal Name <span class="text-gray-500 font-normal">— e.g. "New Mic Fund"</span></label>
+            <input id="f-goal-label" type="text" placeholder="New Camera Fund" />
           </div>
-        </details>
+          <div class="field">
+            <label>Goal Target ($)</label>
+            <input id="f-goal-target" type="number" min="0" step="1" placeholder="1000" />
+          </div>
+          <div class="field">
+            <label>Currently Raised ($) <span class="text-gray-500 font-normal">— update after each stream</span></label>
+            <input id="f-goal-current" type="number" min="0" step="1" placeholder="0" />
+          </div>
+          <div></div>
+          <div class="field">
+            <label>PayPal.me URL
+              <a href="https://www.paypal.com/paypalme/" target="_blank" rel="noopener noreferrer"
+                 class="text-twitch hover:underline ml-1">get yours free ↗</a>
+            </label>
+            <input id="f-paypal" type="url" placeholder="https://paypal.me/yourname" />
+          </div>
+          <div class="field">
+            <label>Stripe / Ko-fi / Buy Button URL
+              <span class="text-gray-500 font-normal">— optional</span>
+            </label>
+            <input id="f-stripe" type="url" placeholder="https://ko-fi.com/yourname" />
+          </div>
+        </div>
+      </div>
 
-        <!-- Error message -->
-        <div id="form-error" class="hidden rounded-lg bg-red-950/60 border border-red-800/60 px-3 py-2 text-sm text-red-300"></div>
-
-        <!-- Submit -->
-        <button id="connect-btn" type="button"
-                class="w-full rounded-full bg-twitch hover:bg-twitch/90 text-white font-bold text-sm py-2.5 shadow shadow-twitch/30 transition flex items-center justify-center gap-2">
-          <span id="connect-btn-text">Connect Everything</span>
-          <span id="connect-btn-spinner" class="hidden w-4 h-4 border-2 border-t-transparent border-white rounded-full spin"></span>
+      <!-- ── SECTION 3: Stream Schedule ────────────────────────────────────── -->
+      <div class="section-card rounded-2xl border border-neutral-800 bg-neutral-900/40 p-5">
+        <div class="section-title">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+          Stream Schedule
+          <span class="ml-auto text-gray-600 font-normal normal-case tracking-normal text-[11px]">Shows on your Live Now page</span>
+        </div>
+        <div class="field mb-2">
+          <label>Timezone</label>
+          <select id="f-timezone" style="width:auto;min-width:220px">
+            <option value="America/New_York">Eastern (ET)</option>
+            <option value="America/Chicago">Central (CT)</option>
+            <option value="America/Denver">Mountain (MT)</option>
+            <option value="America/Los_Angeles">Pacific (PT)</option>
+            <option value="America/Phoenix">Arizona (no DST)</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </div>
+        <div class="space-y-2" id="schedule-slots">
+          <!-- slots injected by JS -->
+        </div>
+        <button id="add-slot-btn" type="button"
+                class="mt-2 text-xs text-twitch hover:text-twitch/80 transition">
+          + Add another time slot
         </button>
       </div>
 
-      <!-- Success card (shown after connect) -->
-      <div id="success-card" class="hidden rounded-2xl border border-green-800/50 bg-green-950/30 p-5 space-y-3">
-        <div class="flex items-center gap-2">
-          <span class="text-green-400 text-lg">✅</span>
-          <h2 class="font-bold text-gray-50">Connected!</h2>
+      <!-- ── SECTION 4: Notifications ──────────────────────────────────────── -->
+      <div class="section-card rounded-2xl border border-neutral-800 bg-neutral-900/40 p-5">
+        <div class="section-title">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          Notifications
         </div>
-        <div id="success-rows" class="space-y-2 text-sm"></div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="field">
+            <label>Notify Secret
+              <span class="text-gray-500 font-normal">— protects your Go-Live button</span>
+            </label>
+            <input id="f-notify-secret" type="text" autocomplete="off"
+                   placeholder="any-random-string" />
+          </div>
+          <div class="field">
+            <label>Discord Webhook URL
+              <span class="text-gray-500 font-normal">— Server Settings → Integrations</span>
+            </label>
+            <input id="f-discord" type="url" autocomplete="off"
+                   placeholder="https://discord.com/api/webhooks/..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Error + Submit ─────────────────────────────────────────────────── -->
+      <div id="form-error" class="hidden rounded-xl bg-red-950/60 border border-red-800/60 px-4 py-2.5 text-sm text-red-300"></div>
+
+      <button id="save-all-btn" type="button"
+              class="w-full rounded-2xl bg-twitch hover:bg-twitch/90 text-white font-bold text-sm py-3.5 shadow shadow-twitch/30 transition flex items-center justify-center gap-2">
+        <span id="save-btn-text">Save Everything &amp; Connect</span>
+        <span id="save-btn-spinner" class="hidden w-4 h-4 border-2 border-t-transparent border-white rounded-full spin"></span>
+      </button>
+
+      <!-- ── Success Banner ─────────────────────────────────────────────────── -->
+      <div id="success-banner" class="hidden rounded-2xl border border-green-700/50 bg-green-950/30 p-5 space-y-3">
+        <div class="flex items-center gap-2 font-bold text-gray-50">
+          <span class="text-green-400 text-lg">✅</span> Saved &amp; Connected!
+        </div>
+        <div id="success-rows" class="text-sm space-y-1.5"></div>
         <hr class="border-neutral-800" />
-        <p class="text-xs text-gray-400">All your pages now detect live status from Twitch in real time. Use the links below to verify:</p>
+        <p class="text-xs text-gray-400">All your pages now update live. Test them:</p>
         <div class="flex flex-wrap gap-2 text-xs">
           <a href="/live-now.html" target="_blank" rel="noopener noreferrer"
-             class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Live Now page ↗</a>
+             class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Live Now ↗</a>
           <a href="/stream-chat.html" target="_blank" rel="noopener noreferrer"
              class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Stream + Chat ↗</a>
           <a href="/widget-embed.html" target="_blank" rel="noopener noreferrer"
              class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Widget ↗</a>
+          <a href="/schedule-embed.html" target="_blank" rel="noopener noreferrer"
+             class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Schedule ↗</a>
           <a href="/go-live.html" target="_blank" rel="noopener noreferrer"
              class="rounded-full bg-twitch/90 hover:bg-twitch text-white px-3 py-1.5 font-semibold transition">Go-Live Panel ↗</a>
         </div>
       </div>
 
-      <!-- Footer -->
-      <p class="text-center text-[11px] text-gray-600">
-        Credentials are stored securely in Netlify Blobs (your site's private storage). They are never sent anywhere except Twitch's own API for validation.
+      <p class="text-center text-[11px] text-gray-600 pb-4">
+        Credentials saved securely in Netlify Blobs (your site's private storage).
+        They are never sent anywhere except Twitch's API for validation.
       </p>
     </div>
 
     <script type="module">
-      const API = "/.netlify/functions/setup";
+      const SETUP_API   = "/.netlify/functions/setup";
+      const CONFIG_API  = "/.netlify/functions/save-config";
+      const STATUS_API  = "/.netlify/functions/setup";
+      const CONFIG_READ = "/.netlify/functions/config";
 
-      function statusRow(label, ok, detail = "") {
-        const color = ok === true ? "text-green-400" : ok === false ? "text-red-400" : "text-gray-400";
-        const icon  = ok === true ? "✅" : ok === false ? "❌" : "⬜";
-        return `<div class="flex items-center gap-2">
-          <span>${icon}</span>
-          <span class="font-medium text-gray-200">${label}</span>
-          ${detail ? `<span class="${color} text-xs">${detail}</span>` : ""}
-        </div>`;
+      const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+      // ── Schedule slot management ──────────────────────────────────────────
+      let scheduleSlots = [
+        { dayOfWeek: 1, hour: 20, minute: 0, title: "", game: "Variety" },
+        { dayOfWeek: 3, hour: 20, minute: 0, title: "", game: "Variety" },
+        { dayOfWeek: 6, hour: 14, minute: 0, title: "", game: "Variety" },
+      ];
+
+      function buildSlotRow(slot, idx) {
+        const dayOpts = DAYS.map((d, i) =>
+          `<option value="${i}" ${slot.dayOfWeek === i ? "selected" : ""}>${d}</option>`
+        ).join("");
+        const mins = String(slot.minute || 0).padStart(2, "0");
+        return `
+          <div class="flex flex-wrap items-end gap-2 p-2.5 rounded-lg bg-neutral-950/50 border border-neutral-800" data-slot="${idx}">
+            <div style="min-width:130px">
+              <label>Day</label>
+              <select class="slot-day" data-idx="${idx}" style="width:100%">${dayOpts}</select>
+            </div>
+            <div style="min-width:70px">
+              <label>Hour</label>
+              <input class="slot-hour" data-idx="${idx}" type="number" min="0" max="23" value="${slot.hour}" style="width:100%" />
+            </div>
+            <div style="min-width:60px">
+              <label>Min</label>
+              <input class="slot-min" data-idx="${idx}" type="number" min="0" max="59" value="${mins}" style="width:100%" />
+            </div>
+            <div style="flex:1;min-width:160px">
+              <label>Stream Title</label>
+              <input class="slot-title" data-idx="${idx}" type="text" value="${slot.title}" placeholder="Monday Night Gaming" style="width:100%" />
+            </div>
+            <button type="button" class="remove-slot text-gray-500 hover:text-red-400 transition text-xs pb-1.5" data-idx="${idx}">✕</button>
+          </div>`;
       }
 
+      function renderSlots() {
+        const container = document.getElementById("schedule-slots");
+        if (!container) return;
+        container.innerHTML = scheduleSlots.map((s, i) => buildSlotRow(s, i)).join("");
+
+        container.querySelectorAll(".slot-day").forEach(el => {
+          el.addEventListener("change", e => { scheduleSlots[+e.target.dataset.idx].dayOfWeek = +e.target.value; });
+        });
+        container.querySelectorAll(".slot-hour").forEach(el => {
+          el.addEventListener("input", e => { scheduleSlots[+e.target.dataset.idx].hour = +e.target.value; });
+        });
+        container.querySelectorAll(".slot-min").forEach(el => {
+          el.addEventListener("input", e => { scheduleSlots[+e.target.dataset.idx].minute = +e.target.value; });
+        });
+        container.querySelectorAll(".slot-title").forEach(el => {
+          el.addEventListener("input", e => { scheduleSlots[+e.target.dataset.idx].title = e.target.value; });
+        });
+        container.querySelectorAll(".remove-slot").forEach(el => {
+          el.addEventListener("click", e => {
+            scheduleSlots.splice(+e.target.dataset.idx, 1);
+            renderSlots();
+          });
+        });
+      }
+
+      document.getElementById("add-slot-btn")?.addEventListener("click", () => {
+        scheduleSlots.push({ dayOfWeek: 0, hour: 20, minute: 0, title: "", game: "Variety" });
+        renderSlots();
+      });
+
+      // ── Load current status & pre-fill ───────────────────────────────────
       async function loadStatus() {
         try {
-          const r = await fetch(API, { cache: "no-store" });
-          const d = await r.json();
-          const card = document.getElementById("status-card");
-          const rows = document.getElementById("status-rows");
-          card.classList.remove("hidden");
+          // Load saved Twitch creds status
+          const credsRes = await fetch(STATUS_API, { cache: "no-store" });
+          const creds = await credsRes.json();
 
-          if (!d.configured) {
-            rows.innerHTML = statusRow("Twitch credentials", false, "Not configured yet");
-            return;
+          // Load full config (merged)
+          const cfgRes = await fetch(CONFIG_READ, { cache: "no-store" });
+          const cfg = cfgRes.ok ? await cfgRes.json() : {};
+
+          // Pre-fill fields from saved config
+          const ch = cfg.embed?.channel || cfg.twitch?.channel || "";
+          if (ch) {
+            const el = document.getElementById("f-channel");
+            if (el) el.value = ch;
+          }
+          const offline = cfg.embed?.offlineMessage;
+          if (offline) {
+            const el = document.getElementById("f-offline-msg");
+            if (el) el.value = offline;
           }
 
-          rows.innerHTML = [
-            statusRow("Twitch Client ID",     d.hasClientId,      d.hasClientId ? "saved" : "missing"),
-            statusRow("Twitch Client Secret", d.hasClientSecret,  d.hasClientSecret ? "saved" : "missing"),
-            statusRow("Channel",              true,               d.channel || "—"),
-            statusRow("Notify Secret",        d.hasNotifySecret,  d.hasNotifySecret ? "saved" : "optional, not set"),
-            statusRow("Discord Webhook",      d.hasDiscordWebhook,d.hasDiscordWebhook ? "saved" : "optional, not set"),
-            `<div class="text-[11px] text-gray-500 mt-1">Last saved: ${d.savedAt ? new Date(d.savedAt).toLocaleString() : "—"}</div>`,
-          ].join("");
+          const don = cfg.monetization?.donations;
+          if (don) {
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+            setVal("f-goal-label",   don.goalLabel);
+            setVal("f-goal-target",  don.goalTarget);
+            setVal("f-goal-current", don.goalCurrent);
+            const paypal = don.providers?.find(p => p.id === "paypal");
+            const stripe = don.providers?.find(p => p.id === "stripe");
+            if (paypal?.url) setVal("f-paypal", paypal.url);
+            if (stripe?.url) setVal("f-stripe", stripe.url);
+          }
 
-          // Pre-fill channel from saved config
-          if (d.channel) {
-            const ch = document.getElementById("f-channel");
-            if (ch) ch.value = d.channel;
+          if (cfg.schedule?.timezone) {
+            const tz = document.getElementById("f-timezone");
+            if (tz) tz.value = cfg.schedule.timezone;
+          }
+          if (cfg.schedule?.entries?.length) {
+            scheduleSlots = cfg.schedule.entries.map(e => ({ ...e }));
+            renderSlots();
+          }
+
+          // Notify / Discord (not returned by server but show presence)
+          const banner = document.getElementById("status-banner");
+          const rows   = document.getElementById("status-rows");
+          if (banner && rows) {
+            banner.classList.remove("hidden");
+            const row = (label, ok, detail) =>
+              `<div class="flex items-center gap-1.5">
+                <span>${ok ? "✅" : "⬜"}</span>
+                <span class="text-gray-300">${label}</span>
+                <span class="text-xs text-gray-500">${detail || ""}</span>
+              </div>`;
+
+            rows.innerHTML = [
+              row("Twitch Client ID",     creds.hasClientId,      creds.hasClientId     ? "saved" : "not set"),
+              row("Twitch Client Secret", creds.hasClientSecret,  creds.hasClientSecret ? "saved" : "not set"),
+              row("Channel",              !!ch,                   ch || "not set"),
+              row("Notify Secret",        creds.hasNotifySecret,  creds.hasNotifySecret ? "saved" : "optional"),
+              row("Discord Webhook",      creds.hasDiscordWebhook,creds.hasDiscordWebhook ? "saved" : "optional"),
+              don?.providers?.find(p => p.id === "paypal" && p.url && !p.url.includes("your-handle"))
+                ? row("PayPal Tip Jar", true, "saved") : row("PayPal Tip Jar", false, "not set"),
+              cfg.schedule?.entries?.length
+                ? row("Stream Schedule", true, `${cfg.schedule.entries.length} slot(s)`) : row("Stream Schedule", false, "not set"),
+            ].join("");
           }
         } catch {
-          // Blobs not available locally (dev) — just hide status card
+          // Local dev — Blobs unavailable, status stays hidden
         }
       }
 
-      // Toggle secret visibility
+      // ── Toggle secret visibility ──────────────────────────────────────────
       document.getElementById("toggle-secret")?.addEventListener("click", () => {
         const inp = document.getElementById("f-client-secret");
         const btn = document.getElementById("toggle-secret");
@@ -207,84 +397,154 @@
         btn.textContent = showing ? "Show" : "Hide";
       });
 
-      // Connect button
-      document.getElementById("connect-btn")?.addEventListener("click", async () => {
+      // ── Save Everything ───────────────────────────────────────────────────
+      document.getElementById("save-all-btn")?.addEventListener("click", async () => {
+        const errEl  = document.getElementById("form-error");
+        const btn    = document.getElementById("save-all-btn");
+        const text   = document.getElementById("save-btn-text");
+        const spin   = document.getElementById("save-btn-spinner");
+        errEl.classList.add("hidden");
+
         const clientId     = document.getElementById("f-client-id")?.value.trim();
         const clientSecret = document.getElementById("f-client-secret")?.value.trim();
         const channel      = document.getElementById("f-channel")?.value.trim();
+        const offlineMsg   = document.getElementById("f-offline-msg")?.value.trim();
         const notifySecret = document.getElementById("f-notify-secret")?.value.trim();
         const discord      = document.getElementById("f-discord")?.value.trim();
+        const goalLabel    = document.getElementById("f-goal-label")?.value.trim();
+        const goalTarget   = +document.getElementById("f-goal-target")?.value || 0;
+        const goalCurrent  = +document.getElementById("f-goal-current")?.value || 0;
+        const paypalUrl    = document.getElementById("f-paypal")?.value.trim();
+        const stripeUrl    = document.getElementById("f-stripe")?.value.trim();
+        const timezone     = document.getElementById("f-timezone")?.value;
 
-        const errEl = document.getElementById("form-error");
-        errEl.classList.add("hidden");
-
-        if (!clientId || !clientSecret || !channel) {
-          errEl.textContent = "Client ID, Client Secret, and Channel are all required.";
+        if (!channel) {
+          errEl.textContent = "Channel name is required.";
           errEl.classList.remove("hidden");
           return;
         }
 
-        const btn     = document.getElementById("connect-btn");
-        const btnText = document.getElementById("connect-btn-text");
-        const spinner = document.getElementById("connect-btn-spinner");
         btn.disabled = true;
-        btnText.textContent = "Connecting…";
-        spinner.classList.remove("hidden");
+        text.textContent = "Saving…";
+        spin.classList.remove("hidden");
+
+        const results = [];
+        let twitchLive = null;
+
+        // 1. Twitch credentials (only if both fields are filled)
+        if (clientId && clientSecret) {
+          try {
+            const r = await fetch(SETUP_API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                clientId, clientSecret, channel,
+                notifySecret: notifySecret || null,
+                discordWebhook: discord || null,
+              }),
+            });
+            const d = await r.json();
+            if (!r.ok || !d.ok) throw new Error(d.error || `HTTP ${r.status}`);
+            twitchLive = d.live;
+            results.push({ label: "Twitch credentials", ok: true,
+              detail: d.live ? "✅ You're LIVE right now!" : "Saved & validated ✅" });
+          } catch (err) {
+            btn.disabled = false;
+            text.textContent = "Save Everything & Connect";
+            spin.classList.add("hidden");
+            errEl.textContent = "Twitch error: " + err.message;
+            errEl.classList.remove("hidden");
+            return;
+          }
+        } else {
+          results.push({ label: "Twitch credentials", ok: null, detail: "Skipped (fields empty)" });
+        }
+
+        // 2. Site config (donations, schedule, offline message)
+        const providers = [];
+        if (paypalUrl) providers.push({ id: "paypal", label: "Tip via PayPal", url: paypalUrl });
+        if (stripeUrl) providers.push({ id: "stripe", label: "Tip with Card",  url: stripeUrl });
+
+        const sitePayload = {
+          secret: notifySecret || undefined,
+          embed: { channel, offlineMessage: offlineMsg || "" },
+          monetization: {
+            donations: {
+              ...(goalLabel   ? { goalLabel }   : {}),
+              ...(goalTarget  ? { goalTarget }  : {}),
+              ...(goalCurrent !== undefined ? { goalCurrent } : {}),
+              ...(providers.length ? { providers } : {}),
+            },
+          },
+          schedule: {
+            timezone: timezone || "America/New_York",
+            entries: scheduleSlots.filter(s => s.title || s.hour !== undefined).map(s => ({
+              dayOfWeek: s.dayOfWeek,
+              hour:      s.hour,
+              minute:    s.minute || 0,
+              timezone:  timezone || "America/New_York",
+              title:     s.title || "Stream",
+              game:      s.game || "Variety",
+            })),
+          },
+        };
 
         try {
-          const r = await fetch(API, {
-            method:  "POST",
+          const r = await fetch(CONFIG_API, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({
-              clientId, clientSecret, channel,
-              notifySecret: notifySecret || null,
-              discordWebhook: discord || null,
-            }),
+            body: JSON.stringify(sitePayload),
           });
           const d = await r.json();
-
-          if (!r.ok || !d.ok) {
-            throw new Error(d.error || `Server error ${r.status}`);
-          }
-
-          // Show success
-          document.getElementById("success-card")?.classList.remove("hidden");
-          document.getElementById("success-card")?.classList.add("pulse-once");
-
-          const successRows = document.getElementById("success-rows");
-          if (successRows) {
-            successRows.innerHTML = [
-              statusRow("Twitch credentials", true, "validated against Twitch API"),
-              statusRow("Channel", true, d.channel),
-              statusRow("Live right now", d.live, d.live ? "🔴 You're LIVE!" : "Currently offline"),
-              notifySecret ? statusRow("Notify Secret", true, "saved") : "",
-              discord ? statusRow("Discord Webhook", true, "saved") : "",
-            ].join("");
-          }
-
-          // Refresh status card
-          loadStatus();
-
-          btnText.textContent = "Saved ✓";
-          btn.classList.replace("bg-twitch", "bg-green-700");
-          btn.classList.replace("hover:bg-twitch/90", "hover:bg-green-600");
+          if (!r.ok || !d.ok) throw new Error(d.error || `HTTP ${r.status}`);
+          results.push({ label: "Tip jar / schedule", ok: true, detail: "Saved ✅" });
         } catch (err) {
-          errEl.textContent = err.message;
-          errEl.classList.remove("hidden");
-          btnText.textContent = "Connect Everything";
-          btn.disabled = false;
-        } finally {
-          spinner.classList.add("hidden");
+          results.push({ label: "Site config", ok: false, detail: "Error: " + err.message });
         }
+
+        // ── Show success ────────────────────────────────────────────────────
+        const successBanner = document.getElementById("success-banner");
+        const successRows   = document.getElementById("success-rows");
+        if (successBanner && successRows) {
+          successBanner.classList.remove("hidden");
+          successRows.innerHTML = results.map(r =>
+            `<div class="flex items-start gap-2">
+              <span>${r.ok === true ? "✅" : r.ok === false ? "❌" : "⬜"}</span>
+              <span class="font-medium text-gray-200">${r.label}</span>
+              <span class="text-gray-400 text-xs">${r.detail || ""}</span>
+            </div>`
+          ).join("") + (notifySecret ? `
+            <div class="flex items-start gap-2">
+              <span>✅</span>
+              <span class="font-medium text-gray-200">Notify Secret</span>
+              <span class="text-gray-400 text-xs">Saved ✅</span>
+            </div>` : "") + (discord ? `
+            <div class="flex items-start gap-2">
+              <span>✅</span>
+              <span class="font-medium text-gray-200">Discord Webhook</span>
+              <span class="text-gray-400 text-xs">Saved ✅</span>
+            </div>` : "");
+
+          successBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        text.textContent = "Saved ✓";
+        btn.classList.replace("bg-twitch", "bg-green-700");
+        btn.classList.replace("hover:bg-twitch/90", "hover:bg-green-600");
+        spin.classList.add("hidden");
+
+        // Refresh status
+        loadStatus();
       });
 
-      // Load on start
+      // ── Boot ──────────────────────────────────────────────────────────────
+      renderSlots();
       loadStatus();
 
-      // Also allow Enter key on any input to submit
-      document.querySelectorAll("input").forEach((inp) => {
-        inp.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") document.getElementById("connect-btn")?.click();
+      // Enter key submits
+      document.querySelectorAll("input").forEach(inp => {
+        inp.addEventListener("keydown", e => {
+          if (e.key === "Enter") document.getElementById("save-all-btn")?.click();
         });
       });
     </script>

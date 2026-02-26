@@ -313,10 +313,10 @@
 
       <!-- Donation goal quick-update -->
       <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-3">
-        <h2 class="text-sm font-semibold text-gray-200">Donation Goal (config.json)</h2>
+        <h2 class="text-sm font-semibold text-gray-200">Donation Goal</h2>
         <p class="text-xs text-gray-400">
-          The goal amounts are set in <code class="text-twitch">config.json</code> → <code class="text-twitch">monetization.donations</code>.
-          Update <code>goalCurrent</code> after each stream to reflect real progress.
+          Update your goal amounts on the <a href="/setup" class="text-twitch hover:underline">/setup page</a>.
+          Come back here after each stream to track real progress.
         </p>
         <div id="donation-goal-summary" class="space-y-2 text-xs">
           <!-- Injected -->
@@ -337,7 +337,7 @@
     </div>
 
     <script type="module">
-      const CONFIG_PATH = "./config.json";
+      const CONFIG_PATH = "/.netlify/functions/config";
       const SESSION_SECRET_KEY = "pva_golive_secret";
 
       async function loadConfig() {
@@ -620,7 +620,7 @@
               <div class="h-full bg-twitch rounded-full" style="width:${pct}%"></div>
             </div>
             <p class="text-gray-400">${fmt(d.goalCurrent)} of ${fmt(d.goalTarget)} (${pct.toFixed(1)}%)</p>
-            <p class="text-gray-500">Update <code class="text-twitch">goalCurrent</code> in config.json after each stream to track real progress.</p>`;
+            <p class="text-gray-500">Update the goal amount any time at <a href="/setup" class="text-twitch hover:underline">/setup</a>.</p>`;
         } catch { /* ignore */ }
       }
 
