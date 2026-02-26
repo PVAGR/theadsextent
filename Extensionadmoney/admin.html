@@ -3,62 +3,522 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PVA Bazaar Stream Admin (Preview)</title>
+    <title>PVA Bazaar – Admin Dashboard</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+
+    <style>
+      :root { color-scheme: dark; }
+      .stat-card { transition: border-color 0.2s; }
+      .stat-card:hover { border-color: #9146FF55; }
+    </style>
   </head>
+
   <body class="bg-black text-gray-100 min-h-screen">
-    <main class="max-w-5xl mx-auto px-4 py-6 space-y-4">
-      <header class="flex items-center justify-between">
+
+    <!-- Sidebar + content layout -->
+    <div class="flex min-h-screen">
+
+      <!-- Sidebar -->
+      <aside class="hidden lg:flex flex-col w-56 shrink-0 bg-neutral-950 border-r border-neutral-800 px-4 py-6 gap-6">
         <div>
-          <h1 class="text-xl font-semibold">PVA Bazaar Stream Admin</h1>
-          <p class="text-xs text-gray-400 mt-1">
-            Preview of the future revenue & research dashboard. Authentication and data wiring will
-            be added in a later phase.
-          </p>
+          <h1 class="text-sm font-bold text-gray-50">PVA Bazaar</h1>
+          <p class="text-[11px] text-twitch font-medium mt-0.5">Admin Dashboard</p>
         </div>
-        <span class="text-[11px] px-2 py-1 rounded-full bg-neutral-900 border border-neutral-700">
-          Read-only preview
-        </span>
-      </header>
+        <nav class="flex flex-col gap-1 text-xs">
+          <a href="#overview" class="rounded-lg px-3 py-2 bg-twitch/10 text-twitch font-semibold">Overview</a>
+          <a href="#embeds" class="rounded-lg px-3 py-2 text-gray-400 hover:bg-neutral-900 hover:text-gray-100 transition">Embed Links</a>
+          <a href="#monetization" class="rounded-lg px-3 py-2 text-gray-400 hover:bg-neutral-900 hover:text-gray-100 transition">Monetization</a>
+          <a href="#analytics" class="rounded-lg px-3 py-2 text-gray-400 hover:bg-neutral-900 hover:text-gray-100 transition">Analytics</a>
+          <a href="#schedule" class="rounded-lg px-3 py-2 text-gray-400 hover:bg-neutral-900 hover:text-gray-100 transition">Schedule</a>
+          <a href="#config" class="rounded-lg px-3 py-2 text-gray-400 hover:bg-neutral-900 hover:text-gray-100 transition">Config Inspector</a>
+        </nav>
+        <div class="mt-auto">
+          <div class="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-[11px] text-gray-500">
+            <p class="font-semibold text-gray-400 mb-0.5">Channel</p>
+            <p id="sidebar-channel" class="text-twitch font-bold">ricktaur</p>
+            <div class="flex items-center gap-1.5 mt-1">
+              <span id="sidebar-live-dot" class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+              <span id="sidebar-live-label">Offline</span>
+            </div>
+          </div>
+        </div>
+      </aside>
 
-      <section class="grid gap-3 sm:grid-cols-3 text-xs">
-        <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-3">
-          <div class="text-gray-400 mb-1">Estimated monthly revenue</div>
-          <div class="text-lg font-semibold">$0.00</div>
-          <p class="mt-1 text-[11px] text-gray-500">
-            Placeholder. Will aggregate affiliate, donations, and sponsor data.
-          </p>
-        </div>
-        <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-3">
-          <div class="text-gray-400 mb-1">Affiliate clicks (30d)</div>
-          <div class="text-lg font-semibold">0</div>
-          <p class="mt-1 text-[11px] text-gray-500">
-            Driven by <code>affiliate_click</code> events from the embed.
-          </p>
-        </div>
-        <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-3">
-          <div class="text-gray-400 mb-1">Donation initiations (30d)</div>
-          <div class="text-lg font-semibold">0</div>
-          <p class="mt-1 text-[11px] text-gray-500">
-            Driven by <code>donation_initiated</code> events.
-          </p>
-        </div>
-      </section>
+      <!-- Main content -->
+      <main class="flex-1 min-w-0 px-4 sm:px-6 py-6 space-y-8">
 
-      <section class="rounded-xl border border-neutral-800 bg-neutral-950 p-4 text-xs">
-        <h2 class="text-sm font-semibold mb-2">Research logging overview</h2>
-        <p class="text-gray-300 mb-2">
-          This admin view will surface anonymized metrics only. No IP addresses, usernames, or
-          emails will be visible here, in alignment with research ethics requirements.
-        </p>
-        <ul class="list-disc list-inside text-gray-400 space-y-1">
-          <li>Embed load counts by domain</li>
-          <li>Affiliate click-through rates per product</li>
-          <li>Donation funnel performance per provider</li>
-          <li>A/B test variant performance (e.g., CTA color)</li>
-        </ul>
-      </section>
-    </main>
+        <!-- Top bar -->
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 class="text-xl font-bold text-gray-50 lg:hidden">PVA Bazaar Admin</h1>
+            <h2 class="text-lg font-semibold text-gray-100">Overview</h2>
+            <p class="text-xs text-gray-400 mt-0.5" id="last-refreshed">Loading…</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span
+              id="live-status-badge"
+              class="inline-flex items-center gap-1.5 rounded-full bg-red-600/20 text-red-400 border border-red-600/30 px-3 py-1 text-xs font-semibold"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+              Offline
+            </span>
+            <a
+              id="channel-link"
+              href="https://www.twitch.tv/ricktaur"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rounded-full bg-twitch/90 hover:bg-twitch text-white text-xs font-semibold px-3 py-1.5 shadow shadow-twitch/30 transition"
+            >
+              Open Channel ↗
+            </a>
+          </div>
+        </header>
+
+        <!-- KPI cards -->
+        <section id="overview" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Key metrics">
+          <div class="stat-card rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">Embed Loads (30d)</p>
+            <p class="text-3xl font-bold text-gray-50" id="kpi-embed-loads">–</p>
+            <p class="text-[11px] text-gray-500 mt-1">All embed types combined</p>
+          </div>
+          <div class="stat-card rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">Affiliate Clicks (30d)</p>
+            <p class="text-3xl font-bold text-gray-50" id="kpi-affiliate-clicks">–</p>
+            <p class="text-[11px] text-gray-500 mt-1">Tracked <code>affiliate_click</code> events</p>
+          </div>
+          <div class="stat-card rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">Donation Inits (30d)</p>
+            <p class="text-3xl font-bold text-gray-50" id="kpi-donation-inits">–</p>
+            <p class="text-[11px] text-gray-500 mt-1">Tracked <code>donation_initiated</code> events</p>
+          </div>
+          <div class="stat-card rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">Donation Goal</p>
+            <div class="flex items-end gap-2">
+              <p class="text-3xl font-bold text-gray-50" id="kpi-goal-pct">–%</p>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden mt-2">
+              <div id="kpi-goal-bar" class="h-full bg-twitch rounded-full" style="width:0%"></div>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1" id="kpi-goal-amounts">–</p>
+          </div>
+        </section>
+
+        <!-- Embed links -->
+        <section id="embeds" aria-label="Embed links">
+          <h2 class="text-sm font-semibold text-gray-200 uppercase tracking-wide mb-4">Embed Links</h2>
+          <div class="grid gap-3 sm:grid-cols-2">
+
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-100">Stream Embed</h3>
+                  <p class="text-xs text-gray-400">Player + affiliate footer</p>
+                </div>
+                <span class="text-[10px] rounded-full bg-green-600/20 text-green-400 border border-green-600/30 px-2 py-0.5 font-semibold">Active</span>
+              </div>
+              <code id="embed-link-stream" class="block text-[11px] text-twitch bg-neutral-900 rounded-lg px-3 py-2 break-all">–</code>
+              <div class="flex gap-2 mt-3">
+                <button onclick="copyLink('embed-link-stream')" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Copy</button>
+                <a id="open-stream-embed" href="index.html" target="_blank" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Preview ↗</a>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-100">Stream + Chat</h3>
+                  <p class="text-xs text-gray-400">Side-by-side player and chat</p>
+                </div>
+                <span class="text-[10px] rounded-full bg-green-600/20 text-green-400 border border-green-600/30 px-2 py-0.5 font-semibold">Active</span>
+              </div>
+              <code id="embed-link-stream-chat" class="block text-[11px] text-twitch bg-neutral-900 rounded-lg px-3 py-2 break-all">–</code>
+              <div class="flex gap-2 mt-3">
+                <button onclick="copyLink('embed-link-stream-chat')" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Copy</button>
+                <a id="open-stream-chat-embed" href="stream-chat.html" target="_blank" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Preview ↗</a>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-100">Chat Embed</h3>
+                  <p class="text-xs text-gray-400">Chat-only panel</p>
+                </div>
+                <span class="text-[10px] rounded-full bg-green-600/20 text-green-400 border border-green-600/30 px-2 py-0.5 font-semibold">Active</span>
+              </div>
+              <code id="embed-link-chat" class="block text-[11px] text-twitch bg-neutral-900 rounded-lg px-3 py-2 break-all">–</code>
+              <div class="flex gap-2 mt-3">
+                <button onclick="copyLink('embed-link-chat')" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Copy</button>
+                <a id="open-chat-embed" href="chat-embed.html" target="_blank" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Preview ↗</a>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-100">VOD Embed</h3>
+                  <p class="text-xs text-gray-400">VOD / clips grid player</p>
+                </div>
+                <span class="text-[10px] rounded-full bg-green-600/20 text-green-400 border border-green-600/30 px-2 py-0.5 font-semibold">Active</span>
+              </div>
+              <code id="embed-link-vod" class="block text-[11px] text-twitch bg-neutral-900 rounded-lg px-3 py-2 break-all">–</code>
+              <div class="flex gap-2 mt-3">
+                <button onclick="copyLink('embed-link-vod')" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Copy</button>
+                <a id="open-vod-embed" href="vod-embed.html" target="_blank" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Preview ↗</a>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4 sm:col-span-2">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-100">Schedule Embed</h3>
+                  <p class="text-xs text-gray-400">Upcoming stream schedule with countdown</p>
+                </div>
+                <span class="text-[10px] rounded-full bg-green-600/20 text-green-400 border border-green-600/30 px-2 py-0.5 font-semibold">Active</span>
+              </div>
+              <code id="embed-link-schedule" class="block text-[11px] text-twitch bg-neutral-900 rounded-lg px-3 py-2 break-all">–</code>
+              <div class="flex gap-2 mt-3">
+                <button onclick="copyLink('embed-link-schedule')" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Copy</button>
+                <a id="open-schedule-embed" href="schedule-embed.html" target="_blank" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Preview ↗</a>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- iframe snippet generator -->
+        <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5">
+          <h2 class="text-sm font-semibold text-gray-200 mb-3">iframe Snippet Generator</h2>
+          <div class="flex flex-wrap items-center gap-3 mb-3">
+            <select id="snippet-select" class="rounded-lg bg-neutral-900 border border-neutral-700 text-xs text-gray-200 px-3 py-1.5">
+              <option value="index.html">Stream Embed</option>
+              <option value="stream-chat.html">Stream + Chat</option>
+              <option value="chat-embed.html">Chat Only</option>
+              <option value="vod-embed.html">VOD Embed</option>
+              <option value="schedule-embed.html">Schedule</option>
+            </select>
+            <select id="snippet-height" class="rounded-lg bg-neutral-900 border border-neutral-700 text-xs text-gray-200 px-3 py-1.5">
+              <option value="400">400px</option>
+              <option value="500">500px</option>
+              <option value="600" selected>600px</option>
+              <option value="700">700px</option>
+              <option value="800">800px</option>
+            </select>
+            <button
+              onclick="generateSnippet()"
+              class="rounded-full bg-twitch/80 hover:bg-twitch text-white text-xs font-semibold px-4 py-1.5 transition"
+            >
+              Generate
+            </button>
+          </div>
+          <pre id="snippet-output" class="text-[11px] text-green-300 bg-neutral-900 rounded-lg px-4 py-3 overflow-x-auto whitespace-pre-wrap">Select an embed type above and click Generate.</pre>
+          <button onclick="copySnippet()" class="mt-2 rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">Copy Snippet</button>
+        </section>
+
+        <!-- Monetization section -->
+        <section id="monetization" aria-label="Monetization">
+          <h2 class="text-sm font-semibold text-gray-200 uppercase tracking-wide mb-4">Monetization</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+
+            <!-- Affiliate products -->
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+              <h3 class="text-sm font-semibold text-gray-100 mb-3">Affiliate Products</h3>
+              <div id="affiliate-product-list" class="space-y-2 text-xs">
+                <!-- Products injected here -->
+              </div>
+            </div>
+
+            <!-- Donation goal -->
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+              <h3 class="text-sm font-semibold text-gray-100 mb-3">Donation Goal</h3>
+              <div id="donation-goal-display" class="text-xs space-y-2">
+                <!-- Goal injected here -->
+              </div>
+            </div>
+
+            <!-- Sponsors -->
+            <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4 sm:col-span-2">
+              <h3 class="text-sm font-semibold text-gray-100 mb-3">Sponsor Slots</h3>
+              <div id="sponsor-slot-list" class="flex flex-wrap gap-3 text-xs">
+                <!-- Sponsors injected here -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analytics overview -->
+        <section id="analytics" aria-label="Analytics">
+          <h2 class="text-sm font-semibold text-gray-200 uppercase tracking-wide mb-4">Analytics</h2>
+          <div class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 text-xs space-y-4">
+            <p class="text-gray-300">
+              Analytics are collected via <code class="text-twitch">/.netlify/functions/log</code>
+              using privacy-safe <code class="text-twitch">navigator.sendBeacon</code> calls.
+              No IP addresses, usernames, or emails are captured.
+            </p>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <p class="font-semibold text-gray-200 mb-1">Tracked Events</p>
+                <ul class="space-y-1 text-gray-400 list-disc list-inside">
+                  <li><code class="text-twitch">embed_loaded</code> – domain, device type, embed type</li>
+                  <li><code class="text-twitch">affiliate_click</code> – product ID + UTM URL</li>
+                  <li><code class="text-twitch">donation_initiated</code> – provider ID</li>
+                  <li><code class="text-twitch">sponsor_click</code> – sponsor ID</li>
+                  <li><code class="text-twitch">vod_played</code> – video/clip ID</li>
+                </ul>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-200 mb-1">Persistence (TODO)</p>
+                <ul class="space-y-1 text-gray-400 list-disc list-inside">
+                  <li>Wire <code>log.js</code> to Supabase or S3</li>
+                  <li>Build aggregation queries for 30-day windows</li>
+                  <li>Feed aggregates back to this dashboard via a new Netlify Function</li>
+                  <li>Add A/B test flag tracking</li>
+                </ul>
+              </div>
+            </div>
+            <div class="rounded-xl bg-yellow-500/5 border border-yellow-500/20 px-4 py-3 text-yellow-300/80 text-[11px]">
+              KPI cards above show placeholder values until analytics persistence is wired up.
+            </div>
+          </div>
+        </section>
+
+        <!-- Schedule preview -->
+        <section id="schedule" aria-label="Stream schedule">
+          <h2 class="text-sm font-semibold text-gray-200 uppercase tracking-wide mb-4">Stream Schedule</h2>
+          <div id="schedule-preview" class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4 space-y-2 text-xs">
+            <!-- Schedule rows injected here -->
+          </div>
+        </section>
+
+        <!-- Config inspector -->
+        <section id="config" aria-label="Config inspector">
+          <h2 class="text-sm font-semibold text-gray-200 uppercase tracking-wide mb-4">Config Inspector</h2>
+          <pre
+            id="config-inspector"
+            class="rounded-2xl border border-neutral-800 bg-neutral-950 p-4 text-[11px] text-green-300 overflow-x-auto text-wrap"
+          >Loading config…</pre>
+        </section>
+
+      </main>
+    </div>
+
+    <script>
+      const CONFIG_PATH = "./config.json";
+      const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+      function copyLink(elId) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        navigator.clipboard?.writeText(el.textContent).catch(() => {});
+      }
+
+      function generateSnippet() {
+        const select = document.getElementById("snippet-select");
+        const heightSelect = document.getElementById("snippet-height");
+        const output = document.getElementById("snippet-output");
+        if (!select || !heightSelect || !output) return;
+        const page = select.value;
+        const height = heightSelect.value;
+        const baseUrl = window.location.origin + window.location.pathname.replace("admin.html", "");
+        const src = baseUrl + page;
+        output.textContent = `<iframe\n  src="${src}"\n  width="100%"\n  height="${height}"\n  frameborder="0"\n  scrolling="no"\n  allow="autoplay; fullscreen"\n></iframe>`;
+      }
+
+      function copySnippet() {
+        const output = document.getElementById("snippet-output");
+        if (!output) return;
+        navigator.clipboard?.writeText(output.textContent).catch(() => {});
+      }
+
+      async function loadConfig() {
+        const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+        if (!r.ok) throw new Error(`config load failed: ${r.status}`);
+        return r.json();
+      }
+
+      async function checkLive(twitch) {
+        try {
+          const url = new URL(twitch.statusProxyEndpoint, window.location.origin);
+          url.searchParams.set("channel", twitch.channel);
+          const r = await fetch(url.toString(), { cache: "no-store" });
+          if (!r.ok) return false;
+          return !!(await r.json()).live;
+        } catch { return false; }
+      }
+
+      function renderAffiliate(products) {
+        const list = document.getElementById("affiliate-product-list");
+        if (!list) return;
+        if (!products?.length) { list.innerHTML = '<p class="text-gray-500">No products configured.</p>'; return; }
+        list.replaceChildren();
+        products.forEach((p) => {
+          const row = document.createElement("div");
+          row.className = "flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-2";
+          row.innerHTML = `
+            <img src="${p.image}" alt="${p.title}" class="w-12 h-9 object-cover rounded" loading="lazy" />
+            <div class="flex-1 min-w-0">
+              <p class="text-gray-100 font-medium truncate">${p.title}</p>
+              <p class="text-gray-400">${p.price}</p>
+            </div>
+            <span class="text-[10px] text-gray-500">${p.id}</span>`;
+          list.appendChild(row);
+        });
+      }
+
+      function renderDonationGoal(donations) {
+        const el = document.getElementById("donation-goal-display");
+        if (!el || !donations) return;
+        const pct = donations.goalTarget > 0 ? Math.min(100, (donations.goalCurrent / donations.goalTarget) * 100) : 0;
+        const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+        el.innerHTML = `
+          <p class="font-semibold text-gray-100">${donations.goalLabel}</p>
+          <div class="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden">
+            <div class="h-full bg-twitch rounded-full" style="width:${pct}%"></div>
+          </div>
+          <p class="text-gray-400">${fmt(donations.goalCurrent)} of ${fmt(donations.goalTarget)} (${pct.toFixed(1)}%)</p>
+          <div class="space-y-1 mt-2">
+            ${(donations.providers || []).map((p) => `
+              <div class="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5">
+                <span class="text-gray-200">${p.label}</span>
+                <span class="text-[10px] text-gray-500">${p.id}</span>
+              </div>`).join("")}
+          </div>`;
+      }
+
+      function renderSponsors(sponsors) {
+        const el = document.getElementById("sponsor-slot-list");
+        if (!el || !sponsors?.slots) return;
+        el.replaceChildren();
+        sponsors.slots.forEach((slot) => {
+          const div = document.createElement("div");
+          div.className = `flex items-center gap-3 rounded-lg border ${slot.active ? "border-twitch/30 bg-twitch/5" : "border-neutral-800 bg-neutral-900 opacity-50"} px-3 py-2`;
+          div.innerHTML = `
+            <img src="${slot.logo}" alt="${slot.name}" class="h-6 w-auto object-contain" loading="lazy" />
+            <div>
+              <p class="text-gray-100 font-medium">${slot.name}</p>
+              <p class="text-[10px] text-gray-500">${slot.id} · ${slot.active ? "Active" : "Inactive"}</p>
+            </div>`;
+          el.appendChild(div);
+        });
+      }
+
+      function renderSchedulePreview(schedule) {
+        const el = document.getElementById("schedule-preview");
+        if (!el) return;
+        const entries = schedule?.entries || [];
+        if (!entries.length) { el.innerHTML = '<p class="text-gray-500">No schedule configured.</p>'; return; }
+        el.replaceChildren();
+        entries.forEach((entry) => {
+          const row = document.createElement("div");
+          row.className = "flex items-center gap-4 rounded-lg border border-neutral-800 bg-neutral-900/60 px-4 py-2";
+          const hour12 = entry.hour % 12 || 12;
+          const ampm = entry.hour >= 12 ? "PM" : "AM";
+          const minStr = String(entry.minute || 0).padStart(2, "0");
+          row.innerHTML = `
+            <span class="w-20 text-gray-400 font-semibold">${DAY_NAMES[entry.dayOfWeek]}</span>
+            <span class="flex-1 text-gray-100">${entry.title || "Stream"}</span>
+            ${entry.game ? `<span class="text-gray-500">${entry.game}</span>` : ""}
+            <span class="text-twitch font-semibold">${hour12}:${minStr} ${ampm} ${entry.timezone || "EST"}</span>`;
+          el.appendChild(row);
+        });
+      }
+
+      function updateEmbedLinks() {
+        const base = window.location.origin + window.location.pathname.replace("admin.html", "");
+        const links = {
+          "embed-link-stream": "index.html",
+          "embed-link-stream-chat": "stream-chat.html",
+          "embed-link-chat": "chat-embed.html",
+          "embed-link-vod": "vod-embed.html",
+          "embed-link-schedule": "schedule-embed.html",
+        };
+        Object.entries(links).forEach(([elId, page]) => {
+          const el = document.getElementById(elId);
+          if (el) el.textContent = base + page;
+        });
+        const opens = {
+          "open-stream-embed": "index.html",
+          "open-stream-chat-embed": "stream-chat.html",
+          "open-chat-embed": "chat-embed.html",
+          "open-vod-embed": "vod-embed.html",
+          "open-schedule-embed": "schedule-embed.html",
+        };
+        Object.entries(opens).forEach(([elId, page]) => {
+          const el = document.getElementById(elId);
+          if (el) el.href = page;
+        });
+      }
+
+      async function bootstrap() {
+        updateEmbedLinks();
+
+        const lastRefreshed = document.getElementById("last-refreshed");
+        if (lastRefreshed) lastRefreshed.textContent = `Last refreshed: ${new Date().toLocaleTimeString()}`;
+
+        const config = await loadConfig();
+        const { embed, twitch, monetization, schedule, vods } = config;
+
+        // Sidebar / channel info
+        const sidebarChannel = document.getElementById("sidebar-channel");
+        if (sidebarChannel) sidebarChannel.textContent = embed.channel;
+        const channelLink = document.getElementById("channel-link");
+        if (channelLink) channelLink.href = `https://www.twitch.tv/${encodeURIComponent(embed.channel)}`;
+
+        // Live status
+        const live = await checkLive(twitch);
+        const badge = document.getElementById("live-status-badge");
+        const sidebarDot = document.getElementById("sidebar-live-dot");
+        const sidebarLabel = document.getElementById("sidebar-live-label");
+        if (live) {
+          if (badge) {
+            badge.className = "inline-flex items-center gap-1.5 rounded-full bg-twitch/20 text-twitch border border-twitch/40 px-3 py-1 text-xs font-semibold";
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-twitch animate-pulse"></span> Live`;
+          }
+          if (sidebarDot) sidebarDot.classList.replace("bg-red-500", "bg-green-500");
+          if (sidebarLabel) sidebarLabel.textContent = "Live";
+        }
+
+        // KPIs (placeholder values – wire to Supabase/analytics backend later)
+        const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setKpi("kpi-embed-loads", "–");
+        setKpi("kpi-affiliate-clicks", "–");
+        setKpi("kpi-donation-inits", "–");
+
+        const donations = monetization?.donations;
+        if (donations) {
+          const pct = donations.goalTarget > 0 ? Math.min(100, (donations.goalCurrent / donations.goalTarget) * 100) : 0;
+          setKpi("kpi-goal-pct", `${pct.toFixed(0)}%`);
+          const bar = document.getElementById("kpi-goal-bar");
+          if (bar) bar.style.width = `${pct}%`;
+          const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+          setKpi("kpi-goal-amounts", `${fmt(donations.goalCurrent)} of ${fmt(donations.goalTarget)}`);
+        }
+
+        // Monetization
+        renderAffiliate(monetization?.affiliate?.products);
+        renderDonationGoal(monetization?.donations);
+        renderSponsors(monetization?.sponsors);
+
+        // Schedule
+        renderSchedulePreview(schedule);
+
+        // Config inspector
+        const inspector = document.getElementById("config-inspector");
+        if (inspector) inspector.textContent = JSON.stringify(config, null, 2);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrap);
+      } else {
+        bootstrap().catch((e) => console.error("Admin dashboard bootstrap failed:", e));
+      }
+    </script>
   </body>
 </html>
-

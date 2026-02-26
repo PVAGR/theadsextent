@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PVA Bazaar – Chat Embed</title>
+    <meta name="description" content="Live chat embed for the ricktaur Twitch channel." />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+
+    <style>
+      :root { color-scheme: dark; }
+      html, body, #chat-root, #chat-shell, #chat-shell iframe {
+        height: 100%;
+        min-height: 0;
+      }
+    </style>
+  </head>
+
+  <body class="bg-neutral-950 text-gray-100 h-full flex flex-col">
+    <div id="chat-root" class="flex flex-col h-full w-full max-w-sm mx-auto">
+
+      <!-- Header -->
+      <header class="flex items-center justify-between px-3 py-2 bg-neutral-900 border-b border-neutral-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <span id="live-dot" class="w-2 h-2 rounded-full bg-red-500 transition-colors"></span>
+          <span class="text-xs font-semibold text-gray-200">
+            <span id="channel-name">ricktaur</span> – Live Chat
+          </span>
+        </div>
+        <a
+          id="open-channel-link"
+          href="https://www.twitch.tv/ricktaur"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-[10px] text-twitch hover:underline"
+        >
+          Open on Twitch ↗
+        </a>
+      </header>
+
+      <!-- Chat iframe -->
+      <div id="chat-shell" class="flex-1 overflow-hidden">
+        <div
+          id="chat-loading"
+          class="w-full h-full flex items-center justify-center"
+        >
+          <div class="flex flex-col items-center gap-3 text-center px-4">
+            <div
+              class="w-8 h-8 border-4 border-t-transparent border-twitch rounded-full animate-spin"
+              aria-hidden="true"
+            ></div>
+            <p class="text-xs text-gray-400">Loading chat…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer tip prompt -->
+      <footer class="px-3 py-2 bg-neutral-900 border-t border-neutral-800 shrink-0">
+        <button
+          id="open-tip-jar"
+          type="button"
+          class="w-full rounded-full bg-twitch/90 hover:bg-twitch text-white text-xs font-semibold py-1.5 shadow shadow-twitch/40 transition"
+        >
+          Support ricktaur – Open Tip Jar
+        </button>
+      </footer>
+    </div>
+
+    <!-- Tip Jar Modal -->
+    <div
+      id="tip-jar-backdrop"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 z-40 hidden"
+      aria-hidden="true"
+    >
+      <div class="w-full max-w-sm rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl p-4">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-50">Tip Jar for ricktaur</h2>
+            <p class="text-[11px] text-gray-400 mt-0.5">
+              Donor names are optional and can remain private.
+            </p>
+          </div>
+          <button id="close-tip-jar" type="button" class="text-gray-400 hover:text-gray-200 text-sm">✕</button>
+        </div>
+        <div id="tip-jar-providers" class="space-y-2 text-xs"></div>
+        <p class="mt-3 text-[10px] text-gray-500">
+          Payments processed by third-party providers. No card data stored by this embed.
+        </p>
+      </div>
+    </div>
+
+    <script type="module">
+      const CONFIG_PATH = "./config.json";
+      const CONSENT_KEY = "pva_bazaar_embed_analytics_consent";
+      let analyticsConsent = false;
+
+      async function loadConfig() {
+        const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+        if (!r.ok) throw new Error(`config load failed: ${r.status}`);
+        return r.json();
+      }
+
+      function getParentDomain() {
+        try { return window.location.hostname || "localhost"; } catch { return "localhost"; }
+      }
+
+      function sendBeacon(analytics, event, props) {
+        if (!analytics?.loggingEnabled || !analytics?.beaconEndpoint) return;
+        if (analytics.cookieConsentRequired && !analyticsConsent) return;
+        const payload = JSON.stringify({ event, timestamp: new Date().toISOString(), properties: props });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(analytics.beaconEndpoint, new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch(analytics.beaconEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
+        }
+      }
+
+      function buildChatUrl(channel) {
+        const parent = encodeURIComponent(getParentDomain());
+        return `https://www.twitch.tv/embed/${encodeURIComponent(channel)}/chat?darkpopout&parent=${parent}`;
+      }
+
+      function initChat(channel) {
+        const shell = document.getElementById("chat-shell");
+        const loading = document.getElementById("chat-loading");
+        if (!shell) return;
+
+        const iframe = document.createElement("iframe");
+        iframe.src = buildChatUrl(channel);
+        iframe.setAttribute("frameborder", "0");
+        iframe.setAttribute("scrolling", "no");
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-forms");
+        iframe.className = "w-full h-full";
+        iframe.style.height = "100%";
+        iframe.title = `Twitch chat – ${channel}`;
+        iframe.addEventListener("load", () => { if (loading) loading.remove(); });
+
+        shell.replaceChildren(iframe);
+
+        // Update channel name display and link
+        const nameEl = document.getElementById("channel-name");
+        if (nameEl) nameEl.textContent = channel;
+        const linkEl = document.getElementById("open-channel-link");
+        if (linkEl) linkEl.href = `https://www.twitch.tv/${encodeURIComponent(channel)}`;
+      }
+
+      async function checkLiveStatus(twitch) {
+        try {
+          const url = new URL(twitch.statusProxyEndpoint, window.location.origin);
+          url.searchParams.set("channel", twitch.channel);
+          const r = await fetch(url.toString(), { cache: "no-store" });
+          if (!r.ok) return false;
+          const status = await r.json();
+          return !!status.live;
+        } catch { return false; }
+      }
+
+      function initDonations(donations, analytics) {
+        if (!donations) return;
+        const openBtn = document.getElementById("open-tip-jar");
+        const backdrop = document.getElementById("tip-jar-backdrop");
+        const closeBtn = document.getElementById("close-tip-jar");
+        const providersEl = document.getElementById("tip-jar-providers");
+        if (!openBtn || !backdrop || !closeBtn || !providersEl) return;
+
+        providersEl.replaceChildren();
+        (donations.providers || []).forEach((prov) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "w-full flex items-center justify-between rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 hover:bg-neutral-800 transition";
+          btn.innerHTML = `<span class="font-medium">${prov.label}</span><span class="text-[10px] text-gray-400">External</span>`;
+          btn.addEventListener("click", () => {
+            sendBeacon(analytics, "donation_initiated", { providerId: prov.id });
+            window.open(prov.url, "_blank", "noopener,noreferrer");
+          });
+          providersEl.appendChild(btn);
+        });
+
+        const open = () => { backdrop.classList.remove("hidden"); backdrop.setAttribute("aria-hidden", "false"); };
+        const close = () => { backdrop.classList.add("hidden"); backdrop.setAttribute("aria-hidden", "true"); };
+        openBtn.addEventListener("click", open);
+        closeBtn.addEventListener("click", close);
+        backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+      }
+
+      async function bootstrap() {
+        const config = await loadConfig();
+        const { embed, twitch, analytics, monetization } = config;
+
+        // Consent check
+        const stored = localStorage.getItem(CONSENT_KEY);
+        if (!analytics?.cookieConsentRequired || stored === "accepted") analyticsConsent = true;
+
+        initChat(embed.channel);
+        initDonations(monetization?.donations, analytics);
+
+        const live = await checkLiveStatus(twitch);
+        const dot = document.getElementById("live-dot");
+        if (dot) {
+          dot.classList.toggle("bg-green-500", live);
+          dot.classList.toggle("bg-red-500", !live);
+        }
+
+        sendBeacon(analytics, "embed_loaded", { domain: getParentDomain(), embedType: "chat_only", version: config.version });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrap);
+      } else {
+        bootstrap().catch((e) => console.error("Chat embed bootstrap failed:", e));
+      }
+    </script>
+  </body>
+</html>

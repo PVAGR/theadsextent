@@ -1,0 +1,14 @@
+# PVA Bazaar / ricktaur – robots.txt
+# Instructs search engine crawlers which pages to index.
+# Full docs: https://developers.google.com/search/docs/crawling-indexing/robots/intro
+
+User-agent: *
+Allow: /
+
+# Don't index the admin or go-live control pages
+Disallow: /admin.html
+Disallow: /go-live.html
+
+# Point crawlers to the sitemap
+# UPDATE this URL to your actual deployed Netlify URL
+Sitemap: https://YOUR-SITE.netlify.app/sitemap.xml

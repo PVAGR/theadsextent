@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PVA Bazaar – Stream Schedule</title>
+    <meta name="description" content="ricktaur Twitch stream schedule – upcoming stream times, countdowns, and recent VODs." />
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:title"       content="ricktaur Stream Schedule" />
+    <meta property="og:description" content="Upcoming stream schedule for ricktaur on Twitch – never miss a session." />
+    <meta property="og:image"       content="https://static-cdn.jtvnw.net/jtv_user_pictures/ricktaur-profile_image-300x300.png" />
+    <meta property="og:site_name"   content="PVA Bazaar Stream" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary" />
+    <meta name="twitter:title"       content="ricktaur Stream Schedule" />
+    <meta name="twitter:description" content="Check when ricktaur goes live next on Twitch." />
+    <meta name="twitter:image"       content="https://static-cdn.jtvnw.net/jtv_user_pictures/ricktaur-profile_image-300x300.png" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+
+    <style>
+      :root { color-scheme: dark; }
+      .countdown-unit { min-width: 3rem; }
+    </style>
+  </head>
+
+  <body class="bg-black text-gray-100 min-h-screen flex items-center justify-center">
+    <main class="w-full max-w-2xl mx-auto px-4 py-8" aria-label="Stream Schedule">
+
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 mb-3">
+          <span id="live-badge" class="hidden inline-flex items-center gap-1.5 rounded-full bg-twitch/20 text-twitch border border-twitch/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+            <span class="w-1.5 h-1.5 rounded-full bg-twitch animate-pulse"></span>
+            Live Now
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-50">
+          <span id="channel-name" class="text-twitch">ricktaur</span> Stream Schedule
+        </h1>
+        <p class="text-gray-400 text-sm mt-1" id="schedule-tagline">
+          Catch every stream – never miss a session.
+        </p>
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-3 text-sm">
+          <a
+            id="follow-link"
+            href="https://www.twitch.tv/ricktaur"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-full bg-twitch text-white px-4 py-2 font-semibold shadow shadow-twitch/40 hover:bg-twitch/90 transition"
+          >
+            Follow on Twitch
+          </a>
+          <a
+            id="live-link"
+            href="https://www.twitch.tv/ricktaur"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-full border border-neutral-600 px-4 py-2 text-gray-200 hover:bg-neutral-800 transition"
+          >
+            Watch Live
+          </a>
+        </div>
+      </header>
+
+      <!-- Countdown to next stream -->
+      <section
+        id="countdown-section"
+        class="mb-8 rounded-2xl border border-neutral-800 bg-neutral-900/60 px-6 py-5 text-center"
+        aria-label="Countdown to next stream"
+      >
+        <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-3">Next Stream In</p>
+        <div id="countdown-display" class="flex items-end justify-center gap-4 sm:gap-6">
+          <div class="countdown-unit flex flex-col items-center">
+            <span id="cd-days" class="text-3xl sm:text-4xl font-bold text-twitch tabular-nums">--</span>
+            <span class="text-[10px] text-gray-500 uppercase tracking-wide mt-1">Days</span>
+          </div>
+          <span class="text-2xl text-neutral-700 mb-2">:</span>
+          <div class="countdown-unit flex flex-col items-center">
+            <span id="cd-hours" class="text-3xl sm:text-4xl font-bold text-twitch tabular-nums">--</span>
+            <span class="text-[10px] text-gray-500 uppercase tracking-wide mt-1">Hours</span>
+          </div>
+          <span class="text-2xl text-neutral-700 mb-2">:</span>
+          <div class="countdown-unit flex flex-col items-center">
+            <span id="cd-mins" class="text-3xl sm:text-4xl font-bold text-twitch tabular-nums">--</span>
+            <span class="text-[10px] text-gray-500 uppercase tracking-wide mt-1">Mins</span>
+          </div>
+          <span class="text-2xl text-neutral-700 mb-2">:</span>
+          <div class="countdown-unit flex flex-col items-center">
+            <span id="cd-secs" class="text-3xl sm:text-4xl font-bold text-twitch tabular-nums">--</span>
+            <span class="text-[10px] text-gray-500 uppercase tracking-wide mt-1">Secs</span>
+          </div>
+        </div>
+        <p id="next-stream-label" class="mt-3 text-xs text-gray-400">–</p>
+        <div id="live-now-msg" class="hidden mt-2 text-sm font-semibold text-twitch">
+          Stream is live right now!
+          <a id="live-now-link" href="https://www.twitch.tv/ricktaur" target="_blank" rel="noopener noreferrer" class="underline ml-1">Watch ↗</a>
+        </div>
+      </section>
+
+      <!-- Weekly schedule grid -->
+      <section aria-label="Weekly schedule" class="mb-8">
+        <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-4">Weekly Schedule</h2>
+        <div id="schedule-grid" class="space-y-2">
+          <!-- Schedule rows injected here -->
+          <div class="text-sm text-gray-500 py-4 text-center" id="schedule-loading">
+            Loading schedule…
+          </div>
+        </div>
+      </section>
+
+      <!-- VOD quick-access -->
+      <section class="mb-8">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wide">Recent VODs</h2>
+          <a
+            id="all-vods-link"
+            href="https://www.twitch.tv/ricktaur/videos"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs text-twitch hover:underline"
+          >
+            View all ↗
+          </a>
+        </div>
+        <div id="vod-list" class="grid grid-cols-2 gap-3">
+          <!-- Compact VOD tiles injected here -->
+        </div>
+      </section>
+
+      <!-- Tip / donate prompt -->
+      <section class="rounded-2xl border border-twitch/30 bg-twitch/5 px-5 py-4 text-center">
+        <p class="text-sm text-gray-200 font-medium mb-1" id="donation-goal-label">Support the stream</p>
+        <div class="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden my-2 max-w-xs mx-auto">
+          <div id="donation-progress" class="h-full bg-twitch rounded-full" style="width:0%"></div>
+        </div>
+        <p id="donation-amounts" class="text-xs text-gray-400 mb-3">&nbsp;</p>
+        <button
+          id="open-tip-jar"
+          type="button"
+          class="inline-flex items-center justify-center rounded-full bg-twitch/90 hover:bg-twitch text-white text-sm font-semibold px-5 py-2 shadow shadow-twitch/40 transition"
+        >
+          Open Tip Jar
+        </button>
+      </section>
+    </main>
+
+    <!-- Tip Jar Modal -->
+    <div
+      id="tip-jar-backdrop"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 z-40 hidden"
+      aria-hidden="true"
+    >
+      <div class="w-full max-w-sm rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl p-5">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <h2 class="text-sm font-semibold text-gray-50" id="tip-jar-channel-title">Tip Jar for ricktaur</h2>
+          <button id="close-tip-jar" type="button" class="text-gray-400 hover:text-gray-200 text-sm">✕</button>
+        </div>
+        <div id="tip-jar-providers" class="space-y-2 text-xs"></div>
+        <p class="mt-3 text-[10px] text-gray-500">Payments processed by third-party providers. No card data stored.</p>
+      </div>
+    </div>
+
+    <!-- Cookie consent -->
+    <div
+      id="cookie-consent-banner"
+      class="fixed inset-x-0 bottom-0 z-30 flex justify-center px-3 pb-3 hidden"
+    >
+      <div class="w-full max-w-3xl rounded-2xl bg-neutral-950/95 border border-neutral-800 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 text-xs text-gray-200">
+        <div class="flex-1">
+          <span class="font-semibold text-gray-50">Analytics & research cookies</span>
+          <span class="block mt-0.5 text-gray-300">Anonymized usage data. No personal identifiers collected.</span>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button id="cookie-decline" type="button" class="px-3 py-1.5 rounded-full border border-neutral-700 text-gray-200 hover:bg-neutral-800">Decline</button>
+          <button id="cookie-accept" type="button" class="px-3 py-1.5 rounded-full bg-twitch/90 hover:bg-twitch text-white font-semibold">Accept</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const CONFIG_PATH = "./config.json";
+      const CONSENT_KEY = "pva_bazaar_embed_analytics_consent";
+      let analyticsConsent = false;
+
+      const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      const SHORT_DAY = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+      async function loadConfig() {
+        const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+        if (!r.ok) throw new Error(`config load failed: ${r.status}`);
+        return r.json();
+      }
+
+      function getParentDomain() {
+        try { return window.location.hostname || "localhost"; } catch { return "localhost"; }
+      }
+
+      function sendBeacon(analytics, event, props) {
+        if (!analytics?.loggingEnabled || !analytics?.beaconEndpoint) return;
+        if (analytics.cookieConsentRequired && !analyticsConsent) return;
+        const payload = JSON.stringify({ event, timestamp: new Date().toISOString(), properties: props });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(analytics.beaconEndpoint, new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch(analytics.beaconEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
+        }
+      }
+
+      function initCookieConsent(analytics) {
+        if (!analytics?.cookieConsentRequired) { analyticsConsent = true; return; }
+        const banner = document.getElementById("cookie-consent-banner");
+        const accept = document.getElementById("cookie-accept");
+        const decline = document.getElementById("cookie-decline");
+        const stored = localStorage.getItem(CONSENT_KEY);
+        if (stored === "accepted") { analyticsConsent = true; return; }
+        if (stored === "declined") { analyticsConsent = false; return; }
+        analyticsConsent = false;
+        banner?.classList.remove("hidden");
+        accept?.addEventListener("click", () => { analyticsConsent = true; localStorage.setItem(CONSENT_KEY, "accepted"); banner?.classList.add("hidden"); });
+        decline?.addEventListener("click", () => { analyticsConsent = false; localStorage.setItem(CONSENT_KEY, "declined"); banner?.classList.add("hidden"); });
+      }
+
+      /**
+       * Given schedule entries (array of { dayOfWeek: 0-6, hour: 0-23, minute: 0-59, title, tz }),
+       * find the next upcoming occurrence relative to now.
+       * Returns a Date object or null.
+       *
+       * @param {Array<{dayOfWeek:number, hour:number, minute:number}>} entries
+       * @returns {{ nextDate: Date|null, entry: object|null }}
+       */
+      function findNextStream(entries) {
+        if (!entries || entries.length === 0) return { nextDate: null, entry: null };
+
+        const now = new Date();
+        let best = null;
+        let bestEntry = null;
+
+        entries.forEach((entry) => {
+          // Try this week and next week (14 days lookahead)
+          for (let weekOffset = 0; weekOffset <= 1; weekOffset++) {
+            const candidate = new Date(now);
+            const currentDay = candidate.getDay();
+            let diff = entry.dayOfWeek - currentDay + weekOffset * 7;
+            candidate.setDate(candidate.getDate() + diff);
+            candidate.setHours(entry.hour, entry.minute || 0, 0, 0);
+            if (candidate > now) {
+              if (!best || candidate < best) {
+                best = candidate;
+                bestEntry = entry;
+              }
+              break;
+            }
+          }
+        });
+
+        return { nextDate: best, entry: bestEntry };
+      }
+
+      function startCountdown(targetDate, channel, analytics) {
+        const daysEl = document.getElementById("cd-days");
+        const hoursEl = document.getElementById("cd-hours");
+        const minsEl = document.getElementById("cd-mins");
+        const secsEl = document.getElementById("cd-secs");
+        const labelEl = document.getElementById("next-stream-label");
+        const liveMsg = document.getElementById("live-now-msg");
+        const liveNowLink = document.getElementById("live-now-link");
+
+        if (!targetDate) {
+          if (labelEl) labelEl.textContent = "No upcoming streams scheduled.";
+          return;
+        }
+
+        if (labelEl) {
+          const opts = { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+          labelEl.textContent = targetDate.toLocaleDateString("en-US", opts);
+        }
+        if (liveNowLink) liveNowLink.href = `https://www.twitch.tv/${encodeURIComponent(channel)}`;
+
+        function tick() {
+          const now = Date.now();
+          const diff = targetDate.getTime() - now;
+
+          if (diff <= 0) {
+            if (daysEl) daysEl.textContent = "0";
+            if (hoursEl) hoursEl.textContent = "0";
+            if (minsEl) minsEl.textContent = "00";
+            if (secsEl) secsEl.textContent = "00";
+            liveMsg?.classList.remove("hidden");
+            return;
+          }
+
+          const days = Math.floor(diff / 86400000);
+          const hours = Math.floor((diff % 86400000) / 3600000);
+          const mins = Math.floor((diff % 3600000) / 60000);
+          const secs = Math.floor((diff % 60000) / 1000);
+
+          if (daysEl) daysEl.textContent = days;
+          if (hoursEl) hoursEl.textContent = hours;
+          if (minsEl) minsEl.textContent = String(mins).padStart(2, "0");
+          if (secsEl) secsEl.textContent = String(secs).padStart(2, "0");
+        }
+
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      function initScheduleGrid(schedule, channel) {
+        const grid = document.getElementById("schedule-grid");
+        const loadingEl = document.getElementById("schedule-loading");
+        if (!grid) return;
+
+        if (!schedule || schedule.length === 0) {
+          if (loadingEl) loadingEl.textContent = "No schedule configured yet.";
+          return;
+        }
+
+        loadingEl?.remove();
+
+        const today = new Date().getDay();
+
+        const sorted = [...schedule].sort((a, b) => {
+          // Sort by proximity to today
+          const da = (a.dayOfWeek - today + 7) % 7;
+          const db = (b.dayOfWeek - today + 7) % 7;
+          return da - db || a.hour - b.hour;
+        });
+
+        sorted.forEach((entry) => {
+          const isToday = entry.dayOfWeek === today;
+          const isUpcoming = (entry.dayOfWeek - today + 7) % 7 < 3;
+
+          const row = document.createElement("div");
+          row.className = `flex items-center gap-3 rounded-xl border px-4 py-3 transition ${
+            isToday
+              ? "border-twitch/50 bg-twitch/5"
+              : "border-neutral-800 bg-neutral-900/40 hover:border-neutral-700"
+          }`;
+
+          const hour12 = entry.hour % 12 || 12;
+          const amPm = entry.hour >= 12 ? "PM" : "AM";
+          const minStr = String(entry.minute || 0).padStart(2, "0");
+          const timeStr = `${hour12}:${minStr} ${amPm}`;
+          const tzLabel = entry.timezone || "EST";
+
+          row.innerHTML = `
+            <div class="w-12 text-center shrink-0">
+              <span class="text-xs font-semibold ${isToday ? "text-twitch" : "text-gray-400"}">${SHORT_DAY[entry.dayOfWeek]}</span>
+              ${isToday ? '<span class="block text-[10px] text-twitch/70">Today</span>' : ""}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-100">${entry.title || "Stream"}</p>
+              ${entry.game ? `<p class="text-[11px] text-gray-400">${entry.game}</p>` : ""}
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-xs font-semibold ${isToday ? "text-twitch" : "text-gray-300"}">${timeStr}</span>
+              <span class="block text-[10px] text-gray-500">${tzLabel}</span>
+            </div>
+            <a
+              href="https://www.twitch.tv/${encodeURIComponent(channel)}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="shrink-0 rounded-full ${isToday ? "bg-twitch text-white" : "border border-neutral-700 text-gray-300 hover:bg-neutral-800"} px-3 py-1 text-[11px] font-semibold transition"
+            >
+              ${isToday ? "Live?" : "Follow"}
+            </a>`;
+
+          grid.appendChild(row);
+        });
+      }
+
+      function initVodList(vods, channel) {
+        const list = document.getElementById("vod-list");
+        const allLink = document.getElementById("all-vods-link");
+        if (!list) return;
+
+        if (allLink) allLink.href = `https://www.twitch.tv/${encodeURIComponent(channel)}/videos`;
+
+        if (!vods || vods.length === 0) {
+          list.innerHTML = `<a href="https://www.twitch.tv/${encodeURIComponent(channel)}/videos" target="_blank" rel="noopener noreferrer" class="col-span-2 text-xs text-twitch hover:underline py-2">Browse VODs on Twitch ↗</a>`;
+          return;
+        }
+
+        vods.slice(0, 4).forEach((vod) => {
+          const thumb = vod.thumbnail || `https://via.placeholder.com/320x180?text=${encodeURIComponent(vod.title||"VOD")}`;
+          const card = document.createElement("a");
+          card.href = `vod-embed.html?video=${encodeURIComponent(vod.videoId || "")}`;
+          card.className = "group rounded-lg border border-neutral-800 bg-neutral-900 overflow-hidden hover:border-twitch/50 transition";
+          card.innerHTML = `
+            <div class="aspect-video relative overflow-hidden bg-neutral-800">
+              <img src="${thumb}" alt="${vod.title||"VOD"}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+            </div>
+            <div class="p-2">
+              <p class="text-[11px] font-medium text-gray-100 line-clamp-2">${vod.title||"VOD"}</p>
+              ${vod.date ? `<p class="text-[10px] text-gray-500 mt-0.5">${new Date(vod.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</p>` : ""}
+            </div>`;
+          list.appendChild(card);
+        });
+      }
+
+      function initDonations(donations, analytics) {
+        if (!donations) return;
+        const labelEl = document.getElementById("donation-goal-label");
+        const progressEl = document.getElementById("donation-progress");
+        const amountsEl = document.getElementById("donation-amounts");
+        const openBtn = document.getElementById("open-tip-jar");
+        const backdrop = document.getElementById("tip-jar-backdrop");
+        const closeBtn = document.getElementById("close-tip-jar");
+        const providersEl = document.getElementById("tip-jar-providers");
+
+        if (labelEl) labelEl.textContent = donations.goalLabel;
+        if (progressEl) {
+          const pct = donations.goalTarget > 0 ? Math.min(100, (donations.goalCurrent / donations.goalTarget) * 100) : 0;
+          progressEl.style.width = `${pct}%`;
+        }
+        if (amountsEl) {
+          const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+          amountsEl.textContent = `${fmt(donations.goalCurrent)} raised of ${fmt(donations.goalTarget)}`;
+        }
+
+        if (providersEl) {
+          providersEl.replaceChildren();
+          (donations.providers || []).forEach((prov) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "w-full flex items-center justify-between rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 hover:bg-neutral-800 transition";
+            btn.innerHTML = `<span class="font-medium">${prov.label}</span><span class="text-[10px] text-gray-400">External</span>`;
+            btn.addEventListener("click", () => {
+              sendBeacon(analytics, "donation_initiated", { providerId: prov.id });
+              window.open(prov.url, "_blank", "noopener,noreferrer");
+            });
+            providersEl.appendChild(btn);
+          });
+        }
+
+        const open = () => { backdrop?.classList.remove("hidden"); backdrop?.setAttribute("aria-hidden", "false"); };
+        const close = () => { backdrop?.classList.add("hidden"); backdrop?.setAttribute("aria-hidden", "true"); };
+        openBtn?.addEventListener("click", open);
+        closeBtn?.addEventListener("click", close);
+        backdrop?.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+      }
+
+      async function checkLiveStatus(twitch) {
+        try {
+          const url = new URL(twitch.statusProxyEndpoint, window.location.origin);
+          url.searchParams.set("channel", twitch.channel);
+          const r = await fetch(url.toString(), { cache: "no-store" });
+          if (!r.ok) return false;
+          const status = await r.json();
+          return !!status.live;
+        } catch { return false; }
+      }
+
+      async function bootstrap() {
+        const config = await loadConfig();
+        const { embed, twitch, analytics, monetization, schedule, vods } = config;
+
+        initCookieConsent(analytics);
+        initDonations(monetization?.donations, analytics);
+
+        // Update channel-specific links
+        const nameEl = document.getElementById("channel-name");
+        if (nameEl) nameEl.textContent = embed.channel;
+        const followLink = document.getElementById("follow-link");
+        if (followLink) followLink.href = `https://www.twitch.tv/${encodeURIComponent(embed.channel)}`;
+        const liveLink = document.getElementById("live-link");
+        if (liveLink) liveLink.href = `https://www.twitch.tv/${encodeURIComponent(embed.channel)}`;
+        const tipTitle = document.getElementById("tip-jar-channel-title");
+        if (tipTitle) tipTitle.textContent = `Tip Jar for ${embed.channel}`;
+
+        // Live status
+        const live = await checkLiveStatus(twitch);
+        const liveBadge = document.getElementById("live-badge");
+        if (live && liveBadge) liveBadge.classList.remove("hidden");
+
+        // Schedule
+        const scheduleEntries = schedule?.entries || [];
+        initScheduleGrid(scheduleEntries, embed.channel);
+
+        // Countdown
+        const { nextDate, entry } = findNextStream(scheduleEntries);
+        startCountdown(nextDate, embed.channel, analytics);
+
+        // VODs
+        initVodList(vods || [], embed.channel);
+
+        sendBeacon(analytics, "embed_loaded", { domain: getParentDomain(), embedType: "schedule", version: config.version });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrap);
+      } else {
+        bootstrap().catch((e) => console.error("Schedule embed bootstrap failed:", e));
+      }
+    </script>
+  </body>
+</html>

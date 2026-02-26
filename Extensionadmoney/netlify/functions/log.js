@@ -67,9 +67,27 @@ exports.handler = async function handler(event) {
       };
     }
 
-    // For now, log to Netlify function logs.
-    // TODO: Wire to Supabase / S3 / GitHub for long-term storage.
+    // Log to Netlify function logs (always).
     console.log("Analytics event:", JSON.stringify(validated));
+
+    // Forward to revenue aggregation function (fire-and-forget).
+    // This persists counts via Netlify Blobs through the revenue function.
+    try {
+      const siteUrl = process.env.SITE_URL || process.env.URL || "";
+      if (siteUrl) {
+        const revenueUrl = `${siteUrl.replace(/\/$/, "")}/.netlify/functions/revenue`;
+        fetch(revenueUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event: validated.event,
+            properties: validated.properties,
+          }),
+        }).catch((err) => console.warn("Revenue forward failed:", err.message));
+      }
+    } catch (fwdErr) {
+      console.warn("Revenue forward error:", fwdErr.message);
+    }
 
     return {
       statusCode: 202,

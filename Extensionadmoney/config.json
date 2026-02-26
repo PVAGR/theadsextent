@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "embed": {
     "channel": "ricktaur",
     "autoplay": true,
@@ -85,6 +85,61 @@
         }
       ]
     }
-  }
+  },
+  "schedule": {
+    "timezone": "America/New_York",
+    "entries": [
+      {
+        "dayOfWeek": 1,
+        "hour": 20,
+        "minute": 0,
+        "timezone": "EST",
+        "title": "Monday Night Gaming",
+        "game": "Variety"
+      },
+      {
+        "dayOfWeek": 3,
+        "hour": 20,
+        "minute": 0,
+        "timezone": "EST",
+        "title": "Wednesday Stream",
+        "game": "Variety"
+      },
+      {
+        "dayOfWeek": 6,
+        "hour": 14,
+        "minute": 0,
+        "timezone": "EST",
+        "title": "Saturday Afternoon Stream",
+        "game": "Variety"
+      }
+    ]
+  },
+  "vods": [
+    {
+      "videoId": "REPLACE_WITH_REAL_VIDEO_ID",
+      "title": "Latest Stream Highlight",
+      "thumbnail": "https://via.placeholder.com/320x180?text=VOD+1",
+      "date": "2026-02-20T20:00:00Z",
+      "duration": "3:45:12",
+      "views": 842
+    },
+    {
+      "videoId": "REPLACE_WITH_REAL_VIDEO_ID_2",
+      "title": "Best Moments Compilation",
+      "thumbnail": "https://via.placeholder.com/320x180?text=VOD+2",
+      "date": "2026-02-17T20:00:00Z",
+      "duration": "2:12:05",
+      "views": 1203
+    },
+    {
+      "videoId": "REPLACE_WITH_REAL_VIDEO_ID_3",
+      "title": "Community Night Stream",
+      "thumbnail": "https://via.placeholder.com/320x180?text=VOD+3",
+      "date": "2026-02-13T20:00:00Z",
+      "duration": "4:02:37",
+      "views": 711
+    }
+  ]
 }
 

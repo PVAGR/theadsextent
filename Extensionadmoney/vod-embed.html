@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PVA Bazaar – VOD Embed</title>
+    <meta name="description" content="Watch ricktaur's VODs and stream highlights on Twitch. Browse and play recent videos." />
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="video.other" />
+    <meta property="og:title"       content="ricktaur VODs & Highlights" />
+    <meta property="og:description" content="Browse and watch ricktaur's latest Twitch stream VODs and highlight clips." />
+    <meta property="og:image"       content="https://static-cdn.jtvnw.net/jtv_user_pictures/ricktaur-profile_image-300x300.png" />
+    <meta property="og:site_name"   content="PVA Bazaar Stream" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="ricktaur VODs & Highlights" />
+    <meta name="twitter:description" content="Watch recent streams and highlights from ricktaur on Twitch." />
+    <meta name="twitter:image"       content="https://static-cdn.jtvnw.net/jtv_user_pictures/ricktaur-profile_image-300x300.png" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+
+    <style>
+      :root { color-scheme: dark; }
+      .embed-aspect-16-9 {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+      }
+      .embed-aspect-16-9 iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .vod-card:hover .vod-overlay { opacity: 1; }
+    </style>
+  </head>
+
+  <body class="bg-black text-gray-100 min-h-screen">
+    <main class="w-full max-w-5xl mx-auto px-4 py-6" aria-label="PVA Bazaar VOD Embed">
+
+      <!-- Status bar -->
+      <section
+        id="embed-status"
+        class="mb-3 flex items-center justify-between text-xs text-gray-400"
+        aria-live="polite"
+      >
+        <span id="embed-status-message">Loading VOD embed…</span>
+        <a
+          id="all-vods-link"
+          href="https://www.twitch.tv/ricktaur/videos"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-twitch hover:underline text-xs"
+        >
+          All VODs on Twitch ↗
+        </a>
+      </section>
+
+      <!-- Active player -->
+      <div
+        id="player-container"
+        class="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden shadow-lg mb-6"
+      >
+        <div class="embed-aspect-16-9 bg-neutral-950">
+          <div
+            id="player-shell"
+            class="absolute inset-0 flex items-center justify-center"
+          >
+            <!-- Player or placeholder injected here -->
+            <div class="flex flex-col items-center gap-3 text-center px-4">
+              <div class="w-10 h-10 border-4 border-t-transparent border-twitch rounded-full animate-spin" aria-hidden="true"></div>
+              <p class="text-sm text-gray-300">Loading VOD player…</p>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-neutral-950 border-t border-neutral-800">
+          <h2 id="active-vod-title" class="text-sm font-semibold text-gray-100">–</h2>
+          <p id="active-vod-meta" class="text-xs text-gray-400 mt-0.5">–</p>
+        </div>
+      </div>
+
+      <!-- VOD grid -->
+      <section aria-label="Recent VODs">
+        <h2 class="text-sm font-semibold text-gray-200 mb-3">
+          Recent VODs from <span class="text-twitch">ricktaur</span>
+        </h2>
+        <div
+          id="vod-grid"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
+          <!-- VOD cards injected here -->
+        </div>
+        <div id="vod-empty" class="hidden text-sm text-gray-400 py-6 text-center">
+          No VODs configured yet.
+          <a
+            href="https://www.twitch.tv/ricktaur/videos"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-twitch hover:underline ml-1"
+          >Browse Twitch ↗</a>
+        </div>
+      </section>
+
+      <!-- Affiliate strip -->
+      <section
+        id="affiliate-strip"
+        class="mt-8 rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3 flex items-center gap-4"
+        aria-label="Featured gear"
+      >
+        <div
+          id="affiliate-image-shell"
+          class="w-20 h-14 rounded-md bg-neutral-800 flex items-center justify-center text-[10px] text-gray-500 shrink-0"
+        >
+          Loading…
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-0.5">Featured gear</p>
+          <div id="affiliate-title" class="text-sm font-medium text-gray-100 truncate">&nbsp;</div>
+          <div id="affiliate-price" class="text-xs text-gray-400">&nbsp;</div>
+        </div>
+        <button
+          id="affiliate-cta"
+          type="button"
+          class="shrink-0 rounded-full bg-neutral-100 text-black px-4 py-1.5 text-xs font-semibold hover:bg-white transition"
+        >
+          View deal
+        </button>
+      </section>
+      <p class="mt-1 text-[10px] text-gray-500 px-1">Contains affiliate links. Qualifying purchases may earn commissions.</p>
+    </main>
+
+    <!-- Cookie consent -->
+    <div
+      id="cookie-consent-banner"
+      class="fixed inset-x-0 bottom-0 z-30 flex justify-center px-3 pb-3 hidden"
+    >
+      <div class="w-full max-w-3xl rounded-2xl bg-neutral-950/95 border border-neutral-800 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 text-xs text-gray-200">
+        <div class="flex-1">
+          <span class="font-semibold text-gray-50">Analytics & research cookies</span>
+          <span class="block mt-0.5 text-gray-300">Anonymized usage data. No personal identifiers collected.</span>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button id="cookie-decline" type="button" class="px-3 py-1.5 rounded-full border border-neutral-700 text-gray-200 hover:bg-neutral-800">Decline</button>
+          <button id="cookie-accept" type="button" class="px-3 py-1.5 rounded-full bg-twitch/90 hover:bg-twitch text-white font-semibold">Accept</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const CONFIG_PATH = "./config.json";
+      const CONSENT_KEY = "pva_bazaar_embed_analytics_consent";
+      let analyticsConsent = false;
+
+      async function loadConfig() {
+        const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+        if (!r.ok) throw new Error(`config load failed: ${r.status}`);
+        return r.json();
+      }
+
+      function getParentDomain() {
+        try { return window.location.hostname || "localhost"; } catch { return "localhost"; }
+      }
+
+      function setStatus(msg) {
+        const el = document.getElementById("embed-status-message");
+        if (el) el.textContent = msg;
+      }
+
+      function sendBeacon(analytics, event, props) {
+        if (!analytics?.loggingEnabled || !analytics?.beaconEndpoint) return;
+        if (analytics.cookieConsentRequired && !analyticsConsent) return;
+        const payload = JSON.stringify({ event, timestamp: new Date().toISOString(), properties: props });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(analytics.beaconEndpoint, new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch(analytics.beaconEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
+        }
+      }
+
+      function initCookieConsent(analytics) {
+        if (!analytics?.cookieConsentRequired) { analyticsConsent = true; return; }
+        const banner = document.getElementById("cookie-consent-banner");
+        const accept = document.getElementById("cookie-accept");
+        const decline = document.getElementById("cookie-decline");
+        const stored = localStorage.getItem(CONSENT_KEY);
+        if (stored === "accepted") { analyticsConsent = true; return; }
+        if (stored === "declined") { analyticsConsent = false; return; }
+        analyticsConsent = false;
+        banner?.classList.remove("hidden");
+        accept?.addEventListener("click", () => { analyticsConsent = true; localStorage.setItem(CONSENT_KEY, "accepted"); banner?.classList.add("hidden"); });
+        decline?.addEventListener("click", () => { analyticsConsent = false; localStorage.setItem(CONSENT_KEY, "declined"); banner?.classList.add("hidden"); });
+      }
+
+      /**
+       * Load a Twitch VOD or clip into the player.
+       * Supports ?video=<videoId> or ?clip=<clipSlug> query params,
+       * or falls back to the first configured VOD.
+       */
+      function buildVodUrl(videoId, clipSlug) {
+        const parent = encodeURIComponent(getParentDomain());
+        if (clipSlug) return `https://clips.twitch.tv/embed?clip=${encodeURIComponent(clipSlug)}&parent=${parent}`;
+        return `https://player.twitch.tv/?video=${encodeURIComponent(videoId)}&parent=${parent}&autoplay=false`;
+      }
+
+      function loadVodInPlayer(videoId, clipSlug, title, meta, analytics) {
+        const shell = document.getElementById("player-shell");
+        const titleEl = document.getElementById("active-vod-title");
+        const metaEl = document.getElementById("active-vod-meta");
+        if (!shell) return;
+
+        const iframe = document.createElement("iframe");
+        iframe.src = buildVodUrl(videoId, clipSlug);
+        iframe.setAttribute("frameborder", "0");
+        iframe.setAttribute("allowfullscreen", "true");
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
+        iframe.className = "absolute inset-0 w-full h-full";
+        iframe.title = title || "VOD player";
+        shell.replaceChildren(iframe);
+
+        if (titleEl) titleEl.textContent = title || (clipSlug ? `Clip: ${clipSlug}` : `Video: ${videoId}`);
+        if (metaEl) metaEl.textContent = meta || "";
+
+        sendBeacon(analytics, "vod_played", { videoId: videoId || null, clipSlug: clipSlug || null });
+      }
+
+      function initVodGrid(vods, analytics) {
+        const grid = document.getElementById("vod-grid");
+        const empty = document.getElementById("vod-empty");
+        if (!grid) return;
+
+        if (!vods || vods.length === 0) {
+          grid.classList.add("hidden");
+          empty?.classList.remove("hidden");
+          return;
+        }
+
+        vods.forEach((vod) => {
+          const card = document.createElement("div");
+          card.className = "vod-card relative rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden cursor-pointer hover:border-twitch/60 transition group";
+
+          const thumb = vod.thumbnail || `https://via.placeholder.com/320x180?text=${encodeURIComponent(vod.title || "VOD")}`;
+
+          card.innerHTML = `
+            <div class="relative aspect-video bg-neutral-800 overflow-hidden">
+              <img
+                src="${thumb}"
+                alt="${vod.title || "VOD thumbnail"}"
+                loading="lazy"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div class="vod-overlay absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-opacity duration-200">
+                <div class="w-12 h-12 rounded-full bg-twitch/90 flex items-center justify-center shadow-lg shadow-twitch/40">
+                  <svg class="w-5 h-5 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
+              ${vod.duration ? `<span class="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded">${vod.duration}</span>` : ""}
+            </div>
+            <div class="p-3">
+              <h3 class="text-xs sm:text-sm font-medium text-gray-100 line-clamp-2 group-hover:text-twitch transition-colors">${vod.title || "Untitled VOD"}</h3>
+              ${vod.date ? `<p class="text-[11px] text-gray-500 mt-1">${new Date(vod.date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</p>` : ""}
+              ${vod.views ? `<p class="text-[11px] text-gray-500">${Number(vod.views).toLocaleString()} views</p>` : ""}
+            </div>`;
+
+          card.addEventListener("click", () => {
+            loadVodInPlayer(vod.videoId, vod.clipSlug, vod.title, vod.date ? `Recorded ${new Date(vod.date).toLocaleDateString()}` : "", analytics);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+
+          grid.appendChild(card);
+        });
+      }
+
+      function initAffiliateStrip(affiliate, analytics) {
+        if (!affiliate?.products?.length) {
+          document.getElementById("affiliate-strip")?.classList.add("hidden");
+          return;
+        }
+        const imgShell = document.getElementById("affiliate-image-shell");
+        const titleEl = document.getElementById("affiliate-title");
+        const priceEl = document.getElementById("affiliate-price");
+        const ctaEl = document.getElementById("affiliate-cta");
+        let idx = 0;
+
+        function render(i) {
+          const p = affiliate.products[i];
+          if (!p) return;
+          if (imgShell) imgShell.innerHTML = `<img src="${p.image}" alt="${p.title}" loading="lazy" class="w-full h-full object-cover rounded-md" />`;
+          if (titleEl) titleEl.textContent = p.title;
+          if (priceEl) priceEl.textContent = p.price;
+          const url = new URL(p.url);
+          url.searchParams.set("utm_source", affiliate.utmSource);
+          url.searchParams.set("utm_medium", affiliate.utmMedium);
+          url.searchParams.set("utm_campaign", affiliate.utmCampaign);
+          if (ctaEl) ctaEl.onclick = () => {
+            sendBeacon(analytics, "affiliate_click", { productId: p.id, url: url.toString() });
+            window.open(url.toString(), "_blank", "noopener,noreferrer");
+          };
+        }
+
+        render(idx);
+        const ms = Math.max(10, affiliate.rotationSeconds || 60) * 1000;
+        setInterval(() => { idx = (idx + 1) % affiliate.products.length; render(idx); }, ms);
+      }
+
+      async function bootstrap() {
+        setStatus("Loading configuration…");
+        const config = await loadConfig();
+        const { embed, twitch, analytics, monetization } = config;
+        const vods = config.vods || [];
+
+        initCookieConsent(analytics);
+        initAffiliateStrip(monetization?.affiliate, analytics);
+
+        // Update "All VODs" link
+        const allLink = document.getElementById("all-vods-link");
+        if (allLink) allLink.href = `https://www.twitch.tv/${encodeURIComponent(embed.channel)}/videos`;
+
+        // Check for ?video= or ?clip= URL params
+        const params = new URLSearchParams(window.location.search);
+        const videoParam = params.get("video");
+        const clipParam = params.get("clip");
+
+        if (videoParam || clipParam) {
+          setStatus(clipParam ? `Loading clip: ${clipParam}` : `Loading video: ${videoParam}`);
+          loadVodInPlayer(videoParam, clipParam, null, null, analytics);
+        } else if (vods.length > 0) {
+          setStatus("Loading first VOD…");
+          const first = vods[0];
+          loadVodInPlayer(first.videoId, first.clipSlug, first.title, first.date ? `Recorded ${new Date(first.date).toLocaleDateString()}` : "", analytics);
+        } else {
+          setStatus("No VOD loaded.");
+          const shell = document.getElementById("player-shell");
+          if (shell) {
+            shell.innerHTML = `
+              <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-4">
+                <p class="text-sm text-gray-400">No VOD selected.</p>
+                <a href="https://www.twitch.tv/${encodeURIComponent(embed.channel)}/videos"
+                   target="_blank" rel="noopener noreferrer"
+                   class="rounded-full bg-twitch text-white px-4 py-2 text-sm font-semibold hover:bg-twitch/90 transition">
+                  Browse VODs on Twitch ↗
+                </a>
+              </div>`;
+          }
+        }
+
+        initVodGrid(vods, analytics);
+        sendBeacon(analytics, "embed_loaded", { domain: getParentDomain(), embedType: "vod", version: config.version });
+        setStatus("VOD embed ready.");
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrap);
+      } else {
+        bootstrap().catch((e) => console.error("VOD embed bootstrap failed:", e));
+      }
+    </script>
+  </body>
+</html>

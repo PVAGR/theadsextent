@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ricktaur is LIVE on Twitch – Watch Now</title>
+    <meta name="description" content="ricktaur is streaming live on Twitch right now. Watch the stream, chat live, and support the channel." />
+
+    <!-- ── Open Graph (Facebook, Discord, Slack previews) ──────────────── -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:title"       content="ricktaur is LIVE on Twitch 🔴" />
+    <meta property="og:description" content="Watch ricktaur live right now – stream, chat, and support the channel." />
+    <meta property="og:image"       content="https://static-cdn.jtvnw.net/jtv_user_pictures/ricktaur-profile_image-300x300.png" />
+    <meta property="og:url"         content="" id="og-url" />
+    <meta property="og:site_name"   content="PVA Bazaar Stream" />
+
+    <!-- ── Twitter Card ────────────────────────────────────────────────── -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="ricktaur is LIVE on Twitch 🔴" />
+    <meta name="twitter:description" content="Catch the live stream right now – chat, donate, watch." />
+    <meta name="twitter:image"       content="https://static-cdn.jtvnw.net/jtv_user_pictures/ricktaur-profile_image-300x300.png" />
+
+    <!-- ── SEO ─────────────────────────────────────────────────────────── -->
+    <link rel="canonical" href="" id="canonical-link" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+
+    <style>
+      :root { color-scheme: dark; }
+      .embed-aspect-16-9 { position: relative; width: 100%; padding-bottom: 56.25%; }
+      .embed-aspect-16-9 iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .chat-panel { height: 400px; }
+      @media (min-width:1024px) { .chat-panel { height: auto; min-height: 460px; } }
+
+      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+      .live-blink { animation: blink 1.2s ease-in-out infinite; }
+    </style>
+  </head>
+
+  <body class="bg-black text-gray-100 min-h-screen">
+
+    <!-- Live banner -->
+    <div id="live-banner" class="hidden w-full bg-twitch text-white text-center text-xs font-bold py-2 tracking-wide uppercase">
+      <span class="live-blink">🔴</span> ricktaur is LIVE right now –
+      <a id="banner-twitch-link" href="https://www.twitch.tv/ricktaur" target="_blank" rel="noopener noreferrer" class="underline ml-1">
+        Watch on Twitch ↗
+      </a>
+    </div>
+
+    <!-- Offline banner (shown when not live) -->
+    <div id="offline-banner" class="hidden w-full bg-neutral-900 border-b border-neutral-800 text-center text-xs text-gray-400 py-2">
+      Stream is currently offline – check the <a href="schedule-embed.html" class="text-twitch hover:underline">schedule</a> for the next session.
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+      <!-- Stream title + meta -->
+      <section class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="live-dot-badge" class="hidden inline-flex items-center gap-1.5 rounded-full bg-twitch/20 text-twitch border border-twitch/40 px-3 py-1 text-xs font-bold uppercase tracking-wide">
+              <span class="w-2 h-2 rounded-full bg-twitch live-blink"></span> LIVE
+            </span>
+          </div>
+          <h1 id="stream-title-display" class="text-xl sm:text-2xl font-bold text-gray-50">
+            ricktaur – Live Stream
+          </h1>
+          <p id="stream-meta-display" class="text-sm text-gray-400 mt-0.5">
+            Streaming on Twitch now
+          </p>
+        </div>
+
+        <!-- Share buttons -->
+        <div class="flex flex-wrap gap-2 text-xs">
+          <button
+            id="copy-link-btn"
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition"
+          >
+            Copy Link
+          </button>
+          <a
+            id="share-twitter"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition"
+          >
+            Share on X/Twitter
+          </a>
+          <a
+            id="twitch-channel-link"
+            href="https://www.twitch.tv/ricktaur"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 rounded-full bg-twitch text-white px-3 py-1.5 font-semibold shadow shadow-twitch/40 hover:bg-twitch/90 transition"
+          >
+            Watch on Twitch ↗
+          </a>
+        </div>
+      </section>
+
+      <!-- Stream player + chat -->
+      <div class="flex flex-col lg:flex-row gap-4">
+
+        <!-- Player -->
+        <div class="flex-1 min-w-0">
+          <div class="bg-neutral-900 rounded-2xl border border-neutral-800 overflow-hidden shadow-xl">
+            <div class="embed-aspect-16-9 bg-neutral-950">
+              <div id="player-shell" class="absolute inset-0 flex items-center justify-center">
+                <div class="flex flex-col items-center gap-3 text-center px-4">
+                  <div class="w-10 h-10 border-4 border-t-transparent border-twitch rounded-full animate-spin"></div>
+                  <p class="text-sm text-gray-300">Loading stream…</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat -->
+        <div
+          id="chat-col"
+          class="w-full lg:w-80 xl:w-96 shrink-0 rounded-2xl border border-neutral-800 bg-neutral-900 overflow-hidden chat-panel"
+        >
+          <div class="flex items-center justify-between px-3 py-2 bg-neutral-950 border-b border-neutral-800">
+            <span class="text-xs font-semibold text-gray-200">Live Chat</span>
+            <span id="chat-live-dot" class="w-2 h-2 rounded-full bg-red-500 transition-colors"></span>
+          </div>
+          <div id="chat-shell" class="w-full" style="height: calc(100% - 33px)"></div>
+        </div>
+      </div>
+
+      <!-- Monetization row -->
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+        <!-- Affiliate -->
+        <div class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
+          <h2 class="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-3">Featured Gear</h2>
+          <div class="flex items-center gap-3">
+            <div id="aff-img" class="w-20 h-14 rounded-lg bg-neutral-800 flex items-center justify-center text-[10px] text-gray-500 shrink-0">Loading…</div>
+            <div class="flex-1 min-w-0">
+              <div id="aff-title" class="text-sm font-medium text-gray-100 truncate">&nbsp;</div>
+              <div id="aff-price" class="text-xs text-gray-400">&nbsp;</div>
+              <button id="aff-cta" type="button" class="mt-2 rounded-full bg-neutral-100 text-black px-3 py-1 text-[11px] font-semibold hover:bg-white transition">View deal</button>
+            </div>
+          </div>
+          <p class="text-[10px] text-gray-500 mt-2">Affiliate links – qualifying purchases earn commissions.</p>
+        </div>
+
+        <!-- Donation -->
+        <div class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
+          <h2 class="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-3">Support ricktaur</h2>
+          <div class="space-y-2">
+            <p id="don-label" class="text-sm font-medium text-gray-100">&nbsp;</p>
+            <div class="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
+              <div id="don-bar" class="h-full bg-twitch rounded-full" style="width:0%"></div>
+            </div>
+            <p id="don-amounts" class="text-xs text-gray-400">&nbsp;</p>
+            <button
+              id="open-tip-jar"
+              type="button"
+              class="w-full rounded-full bg-twitch/90 hover:bg-twitch text-white text-xs font-semibold py-2 shadow shadow-twitch/40 transition"
+            >
+              Open Tip Jar
+            </button>
+          </div>
+        </div>
+
+        <!-- Schedule quick-look -->
+        <div class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
+          <h2 class="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-3">Stream Schedule</h2>
+          <div id="schedule-preview" class="space-y-1.5 text-xs"></div>
+          <a href="schedule-embed.html" class="mt-3 inline-block text-xs text-twitch hover:underline">Full schedule ↗</a>
+        </div>
+      </div>
+
+      <!-- Sponsor row -->
+      <div id="sponsor-row" class="flex flex-wrap items-center gap-3 py-2">
+        <span class="text-[10px] text-gray-500">Partners:</span>
+      </div>
+
+      <!-- Embed this page section -->
+      <section class="rounded-2xl border border-twitch/20 bg-twitch/5 p-5">
+        <h2 class="text-sm font-semibold text-gray-100 mb-1">Embed This Page Anywhere</h2>
+        <p class="text-xs text-gray-400 mb-3">Paste this on your website, Discord server description, or anywhere you own to drive traffic back here.</p>
+        <pre id="embed-snippet" class="text-[11px] text-green-300 bg-neutral-950 rounded-lg px-4 py-3 overflow-x-auto whitespace-pre-wrap">Loading…</pre>
+        <button onclick="navigator.clipboard?.writeText(document.getElementById('embed-snippet').textContent)" class="mt-2 rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">
+          Copy Snippet
+        </button>
+      </section>
+
+    </main>
+
+    <!-- Tip Jar Modal -->
+    <div id="tip-jar-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 z-40 hidden" aria-hidden="true">
+      <div class="w-full max-w-sm rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl p-5">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <h2 class="text-sm font-semibold text-gray-50">Tip Jar for ricktaur</h2>
+          <button id="close-tip-jar" type="button" class="text-gray-400 hover:text-gray-200 text-sm">✕</button>
+        </div>
+        <div id="tip-jar-providers" class="space-y-2 text-xs"></div>
+        <p class="mt-3 text-[10px] text-gray-500">Payments processed by third-party providers. No card data stored.</p>
+      </div>
+    </div>
+
+    <!-- Cookie consent -->
+    <div id="cookie-consent-banner" class="fixed inset-x-0 bottom-0 z-30 flex justify-center px-3 pb-3 hidden">
+      <div class="w-full max-w-3xl rounded-2xl bg-neutral-950/95 border border-neutral-800 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 text-xs text-gray-200">
+        <div class="flex-1">
+          <span class="font-semibold text-gray-50">Analytics &amp; cookies</span>
+          <span class="block mt-0.5 text-gray-300">Anonymized usage data only. No personal identifiers.</span>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button id="cookie-decline" type="button" class="px-3 py-1.5 rounded-full border border-neutral-700 text-gray-200 hover:bg-neutral-800">Decline</button>
+          <button id="cookie-accept" type="button" class="px-3 py-1.5 rounded-full bg-twitch/90 hover:bg-twitch text-white font-semibold">Accept</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const CONFIG_PATH = "./config.json";
+      const CONSENT_KEY = "pva_bazaar_embed_analytics_consent";
+      const DAY_SHORT  = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      let analyticsConsent = false;
+
+      async function loadConfig() {
+        const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+        if (!r.ok) throw new Error(`config load failed: ${r.status}`);
+        return r.json();
+      }
+
+      function getParentDomain() {
+        try { return window.location.hostname || "localhost"; } catch { return "localhost"; }
+      }
+
+      function sendBeacon(analytics, event, props) {
+        if (!analytics?.loggingEnabled || !analytics?.beaconEndpoint) return;
+        if (analytics.cookieConsentRequired && !analyticsConsent) return;
+        const payload = JSON.stringify({ event, timestamp: new Date().toISOString(), properties: props });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(analytics.beaconEndpoint, new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch(analytics.beaconEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
+        }
+      }
+
+      function initCookieConsent(analytics) {
+        if (!analytics?.cookieConsentRequired) { analyticsConsent = true; return; }
+        const banner = document.getElementById("cookie-consent-banner");
+        const accept = document.getElementById("cookie-accept");
+        const decline = document.getElementById("cookie-decline");
+        const stored = localStorage.getItem(CONSENT_KEY);
+        if (stored === "accepted") { analyticsConsent = true; return; }
+        if (stored === "declined") { analyticsConsent = false; return; }
+        analyticsConsent = false;
+        banner?.classList.remove("hidden");
+        accept?.addEventListener("click", () => { analyticsConsent = true; localStorage.setItem(CONSENT_KEY, "accepted"); banner?.classList.add("hidden"); });
+        decline?.addEventListener("click", () => { analyticsConsent = false; localStorage.setItem(CONSENT_KEY, "declined"); banner?.classList.add("hidden"); });
+      }
+
+      // Set canonical + OG URL
+      const pageUrl = window.location.href.split("?")[0];
+      document.getElementById("og-url")?.setAttribute("content", pageUrl);
+      document.getElementById("canonical-link")?.setAttribute("href", pageUrl);
+
+      // Embed snippet
+      const snippetEl = document.getElementById("embed-snippet");
+      if (snippetEl) {
+        snippetEl.textContent = `<iframe\n  src="${pageUrl}"\n  width="100%"\n  height="700"\n  frameborder="0"\n  scrolling="no"\n  allow="autoplay; fullscreen"\n></iframe>`;
+      }
+
+      // Share on Twitter
+      const twitterBtn = document.getElementById("share-twitter");
+      if (twitterBtn) {
+        const text = encodeURIComponent(`🔴 ricktaur is LIVE on Twitch right now! ${pageUrl}`);
+        twitterBtn.href = `https://twitter.com/intent/tweet?text=${text}`;
+      }
+
+      // Copy link button
+      document.getElementById("copy-link-btn")?.addEventListener("click", () => {
+        navigator.clipboard?.writeText(pageUrl);
+      });
+
+      function buildPlayerUrl(channel, embed) {
+        const parent = encodeURIComponent(getParentDomain());
+        return `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&autoplay=${embed.autoplay}&muted=${embed.muted}`;
+      }
+
+      function buildChatUrl(channel) {
+        const parent = encodeURIComponent(getParentDomain());
+        return `https://www.twitch.tv/embed/${encodeURIComponent(channel)}/chat?darkpopout&parent=${parent}`;
+      }
+
+      function setLiveState(channel, embed) {
+        document.getElementById("live-banner")?.classList.remove("hidden");
+        document.getElementById("offline-banner")?.classList.add("hidden");
+        document.getElementById("live-dot-badge")?.classList.remove("hidden");
+
+        const chatDot = document.getElementById("chat-live-dot");
+        if (chatDot) { chatDot.classList.replace("bg-red-500", "bg-green-500"); }
+
+        // Player
+        const shell = document.getElementById("player-shell");
+        if (shell) {
+          const iframe = document.createElement("iframe");
+          iframe.src = buildPlayerUrl(channel, embed);
+          iframe.setAttribute("frameborder", "0");
+          iframe.setAttribute("allowfullscreen", "true");
+          iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
+          iframe.className = "absolute inset-0 w-full h-full";
+          iframe.title = `Twitch live – ${channel}`;
+          shell.replaceChildren(iframe);
+        }
+
+        // Chat
+        const chatShell = document.getElementById("chat-shell");
+        if (chatShell) {
+          const iframe = document.createElement("iframe");
+          iframe.src = buildChatUrl(channel);
+          iframe.setAttribute("frameborder", "0");
+          iframe.setAttribute("scrolling", "no");
+          iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-forms");
+          iframe.className = "w-full h-full";
+          iframe.style.height = "100%";
+          iframe.title = `Twitch chat – ${channel}`;
+          chatShell.replaceChildren(iframe);
+        }
+      }
+
+      function setOfflineState(channel, embed) {
+        document.getElementById("offline-banner")?.classList.remove("hidden");
+        document.getElementById("live-banner")?.classList.add("hidden");
+
+        const shell = document.getElementById("player-shell");
+        if (shell) {
+          shell.innerHTML = `
+            <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 px-4 text-center">
+              <span class="rounded-full bg-red-600/20 text-red-400 border border-red-600/40 px-3 py-1 text-xs font-semibold uppercase">Stream Offline</span>
+              <h2 class="text-xl font-bold">Follow ${channel} for the next session</h2>
+              <p class="text-sm text-gray-400 max-w-md">${embed.offlineMessage}</p>
+              <div class="flex flex-wrap gap-3 justify-center">
+                <a href="https://www.twitch.tv/${encodeURIComponent(channel)}" target="_blank" rel="noopener noreferrer"
+                   class="rounded-full bg-twitch text-white px-4 py-2 text-sm font-semibold hover:bg-twitch/90 transition">Notify on Twitch</a>
+                <a href="schedule-embed.html" class="rounded-full border border-neutral-600 px-4 py-2 text-sm text-gray-200 hover:bg-neutral-800 transition">View Schedule</a>
+              </div>
+            </div>`;
+        }
+
+        // Hide chat when offline
+        document.getElementById("chat-col")?.classList.add("hidden");
+      }
+
+      function initAffiliate(affiliate, analytics) {
+        if (!affiliate?.products?.length) return;
+        let idx = 0;
+        function render(i) {
+          const p = affiliate.products[i];
+          if (!p) return;
+          const imgEl = document.getElementById("aff-img");
+          if (imgEl) imgEl.innerHTML = `<img src="${p.image}" alt="${p.title}" loading="lazy" class="w-full h-full object-cover rounded-lg" />`;
+          const t = document.getElementById("aff-title"); if (t) t.textContent = p.title;
+          const pr = document.getElementById("aff-price"); if (pr) pr.textContent = p.price;
+          const url = new URL(p.url);
+          url.searchParams.set("utm_source", affiliate.utmSource);
+          url.searchParams.set("utm_medium", affiliate.utmMedium);
+          url.searchParams.set("utm_campaign", affiliate.utmCampaign);
+          const cta = document.getElementById("aff-cta");
+          if (cta) cta.onclick = () => { sendBeacon(analytics, "affiliate_click", { productId: p.id, url: url.toString() }); window.open(url.toString(), "_blank", "noopener,noreferrer"); };
+        }
+        render(idx);
+        const ms = Math.max(10, affiliate.rotationSeconds || 60) * 1000;
+        setInterval(() => { idx = (idx + 1) % affiliate.products.length; render(idx); }, ms);
+      }
+
+      function initDonations(donations, analytics) {
+        if (!donations) return;
+        const labelEl = document.getElementById("don-label");
+        const barEl   = document.getElementById("don-bar");
+        const amtsEl  = document.getElementById("don-amounts");
+        const openBtn = document.getElementById("open-tip-jar");
+        const backdrop = document.getElementById("tip-jar-backdrop");
+        const closeBtn = document.getElementById("close-tip-jar");
+        const provEl   = document.getElementById("tip-jar-providers");
+
+        if (labelEl) labelEl.textContent = donations.goalLabel;
+        const pct = donations.goalTarget > 0 ? Math.min(100, (donations.goalCurrent / donations.goalTarget) * 100) : 0;
+        if (barEl) barEl.style.width = `${pct}%`;
+        const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+        if (amtsEl) amtsEl.textContent = `${fmt(donations.goalCurrent)} raised of ${fmt(donations.goalTarget)}`;
+
+        if (provEl) {
+          provEl.replaceChildren();
+          (donations.providers || []).forEach((p) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "w-full flex items-center justify-between rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 hover:bg-neutral-800 transition";
+            btn.innerHTML = `<span class="font-medium">${p.label}</span><span class="text-[10px] text-gray-400">External</span>`;
+            btn.addEventListener("click", () => { sendBeacon(analytics, "donation_initiated", { providerId: p.id }); window.open(p.url, "_blank", "noopener,noreferrer"); });
+            provEl.appendChild(btn);
+          });
+        }
+
+        const open  = () => { backdrop?.classList.remove("hidden"); backdrop?.setAttribute("aria-hidden","false"); };
+        const close = () => { backdrop?.classList.add("hidden"); backdrop?.setAttribute("aria-hidden","true"); };
+        openBtn?.addEventListener("click", open);
+        closeBtn?.addEventListener("click", close);
+        backdrop?.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+      }
+
+      function initSponsors(sponsors, analytics) {
+        const row = document.getElementById("sponsor-row");
+        if (!row || !sponsors?.slots) return;
+        sponsors.slots.filter((s) => s.active).forEach((slot) => {
+          const a = document.createElement("a");
+          a.href = slot.url; a.target = "_blank"; a.rel = "noopener noreferrer sponsored";
+          a.className = "inline-flex items-center rounded-md bg-neutral-900 border border-neutral-800 px-2 py-1 hover:bg-neutral-800 transition";
+          a.innerHTML = `<img src="${slot.logo}" alt="${slot.name}" loading="lazy" class="h-6 w-auto object-contain" />`;
+          a.addEventListener("click", () => sendBeacon(analytics, "sponsor_click", { sponsorId: slot.id }));
+          row.appendChild(a);
+        });
+      }
+
+      function initSchedulePreview(schedule, channel) {
+        const el = document.getElementById("schedule-preview");
+        if (!el) return;
+        const entries = (schedule?.entries || []).slice(0, 3);
+        if (!entries.length) { el.innerHTML = '<p class="text-gray-500">No schedule set.</p>'; return; }
+        const today = new Date().getDay();
+        entries.forEach((entry) => {
+          const isToday = entry.dayOfWeek === today;
+          const h12 = entry.hour % 12 || 12;
+          const ap = entry.hour >= 12 ? "PM" : "AM";
+          const min = String(entry.minute || 0).padStart(2,"0");
+          const row = document.createElement("div");
+          row.className = "flex items-center gap-2";
+          row.innerHTML = `
+            <span class="w-8 text-[11px] font-semibold ${isToday ? "text-twitch" : "text-gray-500"}">${DAY_SHORT[entry.dayOfWeek]}</span>
+            <span class="flex-1 text-gray-200 truncate">${entry.title || "Stream"}</span>
+            <span class="text-[11px] ${isToday ? "text-twitch font-semibold" : "text-gray-500"}">${h12}:${min} ${ap}</span>`;
+          el.appendChild(row);
+        });
+      }
+
+      async function bootstrap() {
+        const config = await loadConfig();
+        const { embed, twitch, analytics, monetization, schedule } = config;
+
+        initCookieConsent(analytics);
+        initAffiliate(monetization?.affiliate, analytics);
+        initDonations(monetization?.donations, analytics);
+        initSponsors(monetization?.sponsors, analytics);
+        initSchedulePreview(schedule, embed.channel);
+
+        // Update Twitch links
+        const channelLink = document.getElementById("twitch-channel-link");
+        if (channelLink) channelLink.href = `https://www.twitch.tv/${encodeURIComponent(embed.channel)}`;
+        const bannerLink = document.getElementById("banner-twitch-link");
+        if (bannerLink) bannerLink.href = `https://www.twitch.tv/${encodeURIComponent(embed.channel)}`;
+
+        sendBeacon(analytics, "embed_loaded", { domain: getParentDomain(), embedType: "live_now", version: config.version });
+
+        // Check live status
+        try {
+          const url = new URL(twitch.statusProxyEndpoint, window.location.origin);
+          url.searchParams.set("channel", twitch.channel);
+          const r = await fetch(url.toString(), { cache: "no-store" });
+          if (!r.ok) throw new Error(`proxy error ${r.status}`);
+          const status = await r.json();
+          if (status.live) { setLiveState(embed.channel, embed); }
+          else { setOfflineState(embed.channel, embed); }
+        } catch {
+          setOfflineState(embed.channel, embed);
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrap);
+      } else {
+        bootstrap().catch((e) => console.error("live-now bootstrap failed:", e));
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PVA Bazaar – Stream + Chat Embed</title>
+    <meta
+      name="description"
+      content="Stream and live chat embed for the ricktaur channel."
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: { twitch: "#9146FF" },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root { color-scheme: dark; }
+
+      .embed-aspect-16-9 {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+      }
+      .embed-aspect-16-9 iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Chat panel fixed height on small screens, fills height on large */
+      .chat-panel {
+        height: 400px;
+      }
+      @media (min-width: 1024px) {
+        .chat-panel {
+          height: auto;
+          min-height: 420px;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="bg-black text-gray-100 min-h-screen flex items-center justify-center">
+    <main
+      id="embed-root"
+      class="w-full max-w-7xl mx-auto px-4 py-6"
+      aria-label="PVA Bazaar Stream + Chat Embed"
+    >
+      <!-- Status bar -->
+      <section
+        id="embed-status"
+        class="mb-3 flex items-center justify-between text-xs text-gray-400"
+        aria-live="polite"
+      >
+        <span id="embed-status-message">Initializing…</span>
+        <div class="flex items-center gap-3">
+          <button
+            id="toggle-chat-btn"
+            type="button"
+            class="rounded-full border border-neutral-700 px-3 py-1 text-xs text-gray-300 hover:bg-neutral-800 transition"
+          >
+            Hide Chat
+          </button>
+          <span id="embed-domain" class="hidden sm:inline-block"></span>
+        </div>
+      </section>
+
+      <!-- Stream + Chat layout -->
+      <div id="layout-wrapper" class="flex flex-col lg:flex-row gap-3">
+
+        <!-- Player column -->
+        <div class="flex-1 min-w-0">
+          <div
+            id="embed-container"
+            class="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 overflow-hidden"
+          >
+            <div class="embed-aspect-16-9 bg-neutral-950">
+              <div
+                id="embed-player-shell"
+                class="absolute inset-0 flex items-center justify-center"
+              >
+                <div class="flex flex-col items-center gap-3 text-center px-4">
+                  <div
+                    class="w-10 h-10 border-4 border-t-transparent border-twitch rounded-full animate-spin"
+                    aria-hidden="true"
+                  ></div>
+                  <p class="text-sm text-gray-300">
+                    Preparing the <span class="font-semibold text-twitch">ricktaur</span> stream…
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer: monetization -->
+            <footer
+              id="embed-footer"
+              class="px-4 py-3 flex flex-col gap-3 bg-neutral-950 border-t border-neutral-800 text-xs"
+            >
+              <div class="flex flex-col sm:flex-row gap-3 sm:items-start sm:justify-between">
+                <!-- Affiliate carousel -->
+                <div class="flex-1 min-w-[220px]">
+                  <h2 class="font-semibold text-gray-100 mb-1">Featured gear</h2>
+                  <div
+                    id="affiliate-carousel"
+                    class="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900/60 p-2"
+                  >
+                    <div
+                      id="affiliate-image-shell"
+                      class="w-20 h-14 rounded-md bg-neutral-800 flex items-center justify-center text-[10px] text-gray-500"
+                    >
+                      Loading…
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div id="affiliate-title" class="font-medium text-gray-100 truncate">&nbsp;</div>
+                      <div id="affiliate-price" class="text-[11px] text-gray-400 mt-0.5">&nbsp;</div>
+                      <button
+                        id="affiliate-cta"
+                        type="button"
+                        class="mt-2 inline-flex items-center gap-1 rounded-full bg-neutral-100 text-black px-3 py-1 text-[11px] font-semibold hover:bg-white transition"
+                      >
+                        View deal
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mt-1 text-[10px] text-gray-500">
+                    Contains affiliate links. Qualifying purchases may earn commissions.
+                  </p>
+                </div>
+
+                <!-- Donation goal -->
+                <div class="w-full max-w-xs">
+                  <h2 class="font-semibold text-gray-100 mb-1">Support the stream</h2>
+                  <div class="rounded-lg border border-neutral-800 bg-neutral-900/60 p-3 space-y-2">
+                    <div id="donation-goal-label" class="text-[11px] text-gray-300 font-medium">&nbsp;</div>
+                    <div class="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
+                      <div id="donation-goal-progress" class="h-full bg-twitch rounded-full" style="width:0%"></div>
+                    </div>
+                    <div id="donation-goal-amounts" class="text-[11px] text-gray-400">&nbsp;</div>
+                    <button
+                      id="open-tip-jar"
+                      type="button"
+                      class="mt-1 inline-flex items-center justify-center w-full rounded-full bg-twitch/90 hover:bg-twitch text-white text-[11px] font-semibold px-3 py-1.5 shadow shadow-twitch/40 transition"
+                    >
+                      Open Tip Jar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sponsors -->
+              <div
+                id="sponsor-row"
+                class="flex flex-wrap items-center gap-2 border-t border-neutral-800 pt-2"
+              >
+                <span class="text-[10px] text-gray-500 mr-1">Partners:</span>
+              </div>
+            </footer>
+          </div>
+        </div>
+
+        <!-- Chat column -->
+        <div
+          id="chat-column"
+          class="w-full lg:w-80 xl:w-96 shrink-0 chat-panel rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden"
+        >
+          <div class="flex items-center justify-between px-3 py-2 bg-neutral-950 border-b border-neutral-800">
+            <span class="text-xs font-semibold text-gray-200">Live Chat</span>
+            <span id="chat-status-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
+          </div>
+          <div id="chat-shell" class="w-full h-full" style="height: calc(100% - 33px)">
+            <!-- Twitch chat iframe injected here -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Tip Jar Modal -->
+    <div
+      id="tip-jar-backdrop"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 z-40 hidden"
+      aria-hidden="true"
+    >
+      <div class="w-full max-w-sm rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl p-4 sm:p-5">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-50">Tip Jar for ricktaur</h2>
+            <p class="text-[11px] text-gray-400 mt-0.5">
+              Choose a secure provider below. Donor names can remain private.
+            </p>
+          </div>
+          <button id="close-tip-jar" type="button" class="text-gray-400 hover:text-gray-200 text-sm">✕</button>
+        </div>
+        <div id="tip-jar-providers" class="space-y-2 text-xs"></div>
+        <p class="mt-3 text-[10px] text-gray-500">
+          Payments processed by third-party providers. No card data stored by this embed.
+        </p>
+      </div>
+    </div>
+
+    <!-- Cookie consent -->
+    <div
+      id="cookie-consent-banner"
+      class="fixed inset-x-0 bottom-0 z-30 flex justify-center px-3 pb-3 hidden"
+    >
+      <div class="w-full max-w-3xl rounded-2xl bg-neutral-950/95 border border-neutral-800 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 text-xs text-gray-200">
+        <div class="flex-1">
+          <span class="font-semibold text-gray-50">Analytics & research cookies</span>
+          <span class="block mt-0.5 text-gray-300">
+            Anonymized usage data for research and experience improvement. No personal identifiers collected.
+          </span>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button id="cookie-decline" type="button" class="px-3 py-1.5 rounded-full border border-neutral-700 text-gray-200 hover:bg-neutral-800">Decline</button>
+          <button id="cookie-accept" type="button" class="px-3 py-1.5 rounded-full bg-twitch/90 hover:bg-twitch text-white font-semibold">Accept</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const CONFIG_PATH = "./config.json";
+      const CONSENT_KEY = "pva_bazaar_embed_analytics_consent";
+      let analyticsConsent = false;
+
+      async function loadConfig() {
+        const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+        if (!r.ok) throw new Error(`config load failed: ${r.status}`);
+        return r.json();
+      }
+
+      function getParentDomain() {
+        try { return window.location.hostname || "localhost"; }
+        catch { return "localhost"; }
+      }
+
+      function setStatus(msg) {
+        const el = document.getElementById("embed-status-message");
+        if (el) el.textContent = msg;
+      }
+
+      function sendBeacon(analytics, event, props) {
+        if (!analytics?.loggingEnabled || !analytics?.beaconEndpoint) return;
+        if (analytics.cookieConsentRequired && !analyticsConsent) return;
+        const payload = JSON.stringify({ event, timestamp: new Date().toISOString(), properties: props });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(analytics.beaconEndpoint, new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch(analytics.beaconEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
+        }
+      }
+
+      function initCookieConsent(analytics) {
+        if (!analytics?.cookieConsentRequired) { analyticsConsent = true; return; }
+        const banner = document.getElementById("cookie-consent-banner");
+        const accept = document.getElementById("cookie-accept");
+        const decline = document.getElementById("cookie-decline");
+        const stored = localStorage.getItem(CONSENT_KEY);
+        if (stored === "accepted") { analyticsConsent = true; return; }
+        if (stored === "declined") { analyticsConsent = false; return; }
+        analyticsConsent = false;
+        banner?.classList.remove("hidden");
+        accept?.addEventListener("click", () => {
+          analyticsConsent = true;
+          localStorage.setItem(CONSENT_KEY, "accepted");
+          banner?.classList.add("hidden");
+        });
+        decline?.addEventListener("click", () => {
+          analyticsConsent = false;
+          localStorage.setItem(CONSENT_KEY, "declined");
+          banner?.classList.add("hidden");
+        });
+      }
+
+      function buildPlayerUrl(embed) {
+        const parent = encodeURIComponent(getParentDomain());
+        return `https://player.twitch.tv/?channel=${embed.channel}&parent=${parent}&autoplay=${embed.autoplay}&muted=${embed.muted}`;
+      }
+
+      function buildChatUrl(channel) {
+        const parent = encodeURIComponent(getParentDomain());
+        return `https://www.twitch.tv/embed/${encodeURIComponent(channel)}/chat?darkpopout&parent=${parent}`;
+      }
+
+      function renderLivePlayer(embed) {
+        const shell = document.getElementById("embed-player-shell");
+        if (!shell) return;
+        const iframe = document.createElement("iframe");
+        iframe.src = buildPlayerUrl(embed);
+        iframe.setAttribute("frameborder", "0");
+        iframe.setAttribute("allowfullscreen", "true");
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
+        iframe.className = "absolute inset-0 w-full h-full";
+        iframe.title = `Twitch player – ${embed.channel}`;
+        shell.replaceChildren(iframe);
+
+        // Update chat live dot to green
+        const dot = document.getElementById("chat-status-dot");
+        if (dot) { dot.classList.replace("bg-red-500", "bg-green-500"); }
+      }
+
+      function renderOffline(embed) {
+        const shell = document.getElementById("embed-player-shell");
+        if (!shell) return;
+        shell.innerHTML = `
+          <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-4">
+            <span class="inline-flex items-center gap-2 rounded-full bg-red-600/20 text-red-400 border border-red-600/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide">Stream Offline</span>
+            <h2 class="text-lg font-semibold">Follow ${embed.channel} for the next live session</h2>
+            <p class="text-sm text-gray-300 max-w-md">${embed.offlineMessage}</p>
+            <div class="flex flex-wrap gap-3 justify-center mt-2">
+              <a href="https://www.twitch.tv/${encodeURIComponent(embed.channel)}" target="_blank" rel="noopener noreferrer"
+                 class="rounded-full bg-twitch text-white px-4 py-2 text-sm font-semibold shadow shadow-twitch/40 hover:bg-twitch/90 transition">
+                Notify me on Twitch
+              </a>
+              <a href="https://www.twitch.tv/${encodeURIComponent(embed.channel)}/videos" target="_blank" rel="noopener noreferrer"
+                 class="rounded-full border border-neutral-600 px-4 py-2 text-sm text-gray-200 hover:bg-neutral-800 transition">
+                Watch VODs
+              </a>
+            </div>
+          </div>`;
+      }
+
+      function initChat(channel) {
+        const shell = document.getElementById("chat-shell");
+        if (!shell) return;
+        const iframe = document.createElement("iframe");
+        iframe.src = buildChatUrl(channel);
+        iframe.setAttribute("frameborder", "0");
+        iframe.setAttribute("scrolling", "no");
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-forms");
+        iframe.className = "w-full h-full";
+        iframe.style.height = "100%";
+        iframe.title = `Twitch chat – ${channel}`;
+        shell.replaceChildren(iframe);
+      }
+
+      function initChatToggle() {
+        const btn = document.getElementById("toggle-chat-btn");
+        const col = document.getElementById("chat-column");
+        if (!btn || !col) return;
+        let visible = true;
+        btn.addEventListener("click", () => {
+          visible = !visible;
+          col.classList.toggle("hidden", !visible);
+          btn.textContent = visible ? "Hide Chat" : "Show Chat";
+        });
+      }
+
+      function initAffiliateCarousel(affiliate, analytics) {
+        if (!affiliate?.products?.length) return;
+        const imgShell = document.getElementById("affiliate-image-shell");
+        const titleEl = document.getElementById("affiliate-title");
+        const priceEl = document.getElementById("affiliate-price");
+        const ctaEl = document.getElementById("affiliate-cta");
+        if (!imgShell || !titleEl || !priceEl || !ctaEl) return;
+        let idx = 0;
+
+        function render(i) {
+          const p = affiliate.products[i];
+          if (!p) return;
+          imgShell.innerHTML = `<img src="${p.image}" alt="${p.title}" loading="lazy" class="w-full h-full object-cover rounded-md" />`;
+          titleEl.textContent = p.title;
+          priceEl.textContent = p.price;
+          const url = new URL(p.url);
+          url.searchParams.set("utm_source", affiliate.utmSource);
+          url.searchParams.set("utm_medium", affiliate.utmMedium);
+          url.searchParams.set("utm_campaign", affiliate.utmCampaign);
+          ctaEl.onclick = () => {
+            sendBeacon(analytics, "affiliate_click", { productId: p.id, url: url.toString() });
+            window.open(url.toString(), "_blank", "noopener,noreferrer");
+          };
+        }
+
+        render(idx);
+        const ms = Math.max(10, affiliate.rotationSeconds || 60) * 1000;
+        setInterval(() => { idx = (idx + 1) % affiliate.products.length; render(idx); }, ms);
+      }
+
+      function initDonations(donations, analytics) {
+        if (!donations) return;
+        const labelEl = document.getElementById("donation-goal-label");
+        const progressEl = document.getElementById("donation-goal-progress");
+        const amountsEl = document.getElementById("donation-goal-amounts");
+        const openBtn = document.getElementById("open-tip-jar");
+        const backdrop = document.getElementById("tip-jar-backdrop");
+        const closeBtn = document.getElementById("close-tip-jar");
+        const providersEl = document.getElementById("tip-jar-providers");
+        if (!labelEl || !progressEl || !amountsEl || !openBtn || !backdrop || !closeBtn || !providersEl) return;
+
+        labelEl.textContent = donations.goalLabel;
+        const pct = donations.goalTarget > 0 ? Math.min(100, (donations.goalCurrent / donations.goalTarget) * 100) : 0;
+        progressEl.style.width = `${pct}%`;
+        const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+        amountsEl.textContent = `${fmt(donations.goalCurrent)} raised of ${fmt(donations.goalTarget)}`;
+
+        providersEl.replaceChildren();
+        (donations.providers || []).forEach((prov) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "w-full flex items-center justify-between rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 hover:bg-neutral-800 transition";
+          btn.innerHTML = `<span class="font-medium">${prov.label}</span><span class="text-[10px] text-gray-400">External</span>`;
+          btn.addEventListener("click", () => {
+            sendBeacon(analytics, "donation_initiated", { providerId: prov.id });
+            window.open(prov.url, "_blank", "noopener,noreferrer");
+          });
+          providersEl.appendChild(btn);
+        });
+
+        const open = () => { backdrop.classList.remove("hidden"); backdrop.setAttribute("aria-hidden", "false"); };
+        const close = () => { backdrop.classList.add("hidden"); backdrop.setAttribute("aria-hidden", "true"); };
+        openBtn.addEventListener("click", open);
+        closeBtn.addEventListener("click", close);
+        backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+      }
+
+      function initSponsors(sponsors, analytics) {
+        if (!sponsors?.slots) return;
+        const row = document.getElementById("sponsor-row");
+        if (!row) return;
+        sponsors.slots.filter((s) => s.active).forEach((slot) => {
+          const a = document.createElement("a");
+          a.href = slot.url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer sponsored";
+          a.className = "inline-flex items-center rounded-md bg-neutral-900 border border-neutral-800 px-2 py-1 hover:bg-neutral-800 transition";
+          a.innerHTML = `<img src="${slot.logo}" alt="${slot.name}" loading="lazy" class="h-6 w-auto object-contain" />`;
+          a.addEventListener("click", () => sendBeacon(analytics, "sponsor_click", { sponsorId: slot.id }));
+          row.appendChild(a);
+        });
+      }
+
+      async function bootstrap() {
+        const domain = getParentDomain();
+        const domainEl = document.getElementById("embed-domain");
+        if (domainEl) { domainEl.textContent = `Parent: ${domain}`; domainEl.classList.remove("hidden"); }
+
+        setStatus("Loading configuration…");
+        const config = await loadConfig();
+        const { embed, twitch, analytics, monetization, chat } = config;
+
+        initCookieConsent(analytics);
+        initAffiliateCarousel(monetization.affiliate, analytics);
+        initDonations(monetization.donations, analytics);
+        initSponsors(monetization.sponsors, analytics);
+        initChatToggle();
+
+        if (chat?.enabled !== false) {
+          initChat(embed.channel);
+        } else {
+          const col = document.getElementById("chat-column");
+          if (col) col.classList.add("hidden");
+        }
+
+        sendBeacon(analytics, "embed_loaded", { domain, embedType: "stream_chat", deviceType: window.innerWidth < 768 ? "mobile" : "desktop", version: config.version });
+
+        setStatus("Checking live status…");
+        try {
+          const url = new URL(twitch.statusProxyEndpoint, window.location.origin);
+          url.searchParams.set("channel", twitch.channel);
+          const r = await fetch(url.toString(), { cache: "no-store" });
+          if (!r.ok) throw new Error(`proxy error ${r.status}`);
+          const status = await r.json();
+          if (status.live) {
+            setStatus("Stream is live – loading player…");
+            renderLivePlayer(embed);
+          } else {
+            setStatus("Stream offline – showing alternate experience.");
+            renderOffline(embed);
+          }
+        } catch {
+          setStatus("Could not reach Twitch – showing offline experience.");
+          renderOffline(embed);
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrap);
+      } else {
+        bootstrap().catch((e) => console.error("Bootstrap failed:", e));
+      }
+    </script>
+  </body>
+</html>

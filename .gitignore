@@ -1,0 +1,21 @@
+# Secrets – never commit these
+.env
+
+# Local dev data (event log, revenue counters)
+.dev-data/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

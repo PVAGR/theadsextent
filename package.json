@@ -1,0 +1,24 @@
+{
+  "name": "pva-bazaar-stream-embed",
+  "version": "1.1.0",
+  "description": "PVA Bazaar Universal Stream Embed + monetisation system for the ricktaur Twitch channel. Run locally or deploy to Netlify.",
+  "main": "server.js",
+  "scripts": {
+    "start":   "node server.js --open",
+    "dev":     "node server.js --open",
+    "serve":   "node server.js",
+    "live":    "node server.js --open",
+    "toggle":  "node -e \"require('http').get('http://localhost:8888/dev/toggle-live', r => { let d=''; r.on('data',c=>d+=c); r.on('end',()=>console.log(d)); })\"",
+    "status":  "node -e \"require('http').get('http://localhost:8888/dev/status', r => { let d=''; r.on('data',c=>d+=c); r.on('end',()=>console.log(JSON.parse(d))); })\""
+  },
+  "keywords": [
+    "twitch", "stream", "embed", "affiliate", "monetization",
+    "ricktaur", "pva-bazaar", "netlify"
+  ],
+  "author": "ricktaur / PVA Bazaar",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {}
+}

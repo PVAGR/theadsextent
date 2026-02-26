@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ricktaur – Live Widget</title>
+    <meta name="robots" content="noindex" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+
+    <style>
+      :root { color-scheme: dark; }
+      html, body { background: transparent; margin: 0; padding: 0; overflow: hidden; }
+
+      /* Mode controlled by ?style= URL param */
+      /* Styles: badge (default), card, minimal */
+
+      @keyframes pulse-dot {
+        0%,100% { opacity: 1; transform: scale(1); }
+        50%      { opacity: 0.5; transform: scale(0.85); }
+      }
+      .live-pulse { animation: pulse-dot 1.3s ease-in-out infinite; }
+
+      @keyframes fade-in {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in { animation: fade-in 0.3s ease forwards; }
+    </style>
+  </head>
+
+  <body class="bg-transparent">
+
+    <!-- Widget root – all modes render inside here -->
+    <div id="widget-root" class="inline-flex fade-in"></div>
+
+    <script type="module">
+      const CONFIG_PATH = "./config.json";
+
+      async function loadConfig() {
+        try {
+          const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+          if (!r.ok) return null;
+          return r.json();
+        } catch { return null; }
+      }
+
+      async function checkLive(twitch) {
+        try {
+          const url = new URL(twitch.statusProxyEndpoint, window.location.origin);
+          url.searchParams.set("channel", twitch.channel);
+          const r = await fetch(url.toString(), { cache: "no-store" });
+          if (!r.ok) return false;
+          return !!(await r.json()).live;
+        } catch { return false; }
+      }
+
+      function getParam(name, defaultVal) {
+        return new URLSearchParams(window.location.search).get(name) ?? defaultVal;
+      }
+
+      function buildLiveUrl(base) {
+        return base + "live-now.html";
+      }
+
+      function getBaseUrl() {
+        return window.location.origin + window.location.pathname.replace("widget-embed.html", "");
+      }
+
+      /**
+       * Badge style: tiny pill – "● LIVE ricktaur" or "○ OFFLINE"
+       * Good for: nav bars, sidebars, small spots.
+       */
+      function renderBadge(root, channel, live, liveUrl) {
+        root.innerHTML = live
+          ? `<a href="${liveUrl}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 rounded-full bg-twitch text-white text-xs font-bold px-3 py-1.5 shadow-lg shadow-twitch/40 hover:bg-twitch/90 transition no-underline">
+               <span class="w-2 h-2 rounded-full bg-white live-pulse"></span>
+               LIVE
+               <span class="font-normal opacity-80">${channel}</span>
+             </a>`
+          : `<span class="inline-flex items-center gap-1.5 rounded-full bg-neutral-800 text-gray-400 text-xs font-medium px-3 py-1.5 border border-neutral-700">
+               <span class="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+               ${channel} · Offline
+             </span>`;
+      }
+
+      /**
+       * Card style: compact card with avatar, status, and CTA.
+       * Good for: sidebars, footers, blog posts.
+       */
+      function renderCard(root, channel, live, liveUrl, scheduleUrl) {
+        const avatarUrl = `https://static-cdn.jtvnw.net/jtv_user_pictures/${channel}-profile_image-300x300.png`;
+        root.innerHTML = `
+          <div class="rounded-2xl border ${live ? "border-twitch/60 bg-twitch/5" : "border-neutral-800 bg-neutral-950"} p-3 w-56 font-sans">
+            <div class="flex items-center gap-3">
+              <div class="relative shrink-0">
+                <img
+                  src="${avatarUrl}"
+                  alt="${channel}"
+                  class="w-10 h-10 rounded-full object-cover bg-neutral-800"
+                  onerror="this.src='https://via.placeholder.com/40?text=${channel[0].toUpperCase()}'"
+                />
+                <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-black ${live ? "bg-twitch live-pulse" : "bg-neutral-600"}"></span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-gray-50 truncate">${channel}</p>
+                <p class="text-[11px] ${live ? "text-twitch font-semibold" : "text-gray-500"}">${live ? "🔴 Live Now" : "Offline"}</p>
+              </div>
+            </div>
+            ${live
+              ? `<a href="${liveUrl}" target="_blank" rel="noopener noreferrer"
+                   class="mt-3 flex items-center justify-center w-full rounded-full bg-twitch text-white text-xs font-bold py-1.5 shadow shadow-twitch/40 hover:bg-twitch/90 transition">
+                   Watch Live ↗
+                 </a>`
+              : `<a href="${scheduleUrl}" target="_blank" rel="noopener noreferrer"
+                   class="mt-3 flex items-center justify-center w-full rounded-full border border-neutral-700 text-gray-300 text-xs font-medium py-1.5 hover:bg-neutral-800 transition">
+                   See Schedule ↗
+                 </a>`
+            }
+          </div>`;
+      }
+
+      /**
+       * Minimal style: bare dot + text, transparent background.
+       * Good for: overlaying on existing styled pages.
+       */
+      function renderMinimal(root, channel, live, liveUrl) {
+        root.innerHTML = live
+          ? `<a href="${liveUrl}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-twitch hover:underline">
+               <span class="w-2 h-2 rounded-full bg-twitch live-pulse"></span>
+               ${channel} is LIVE
+             </a>`
+          : `<span class="inline-flex items-center gap-2 text-sm text-gray-500">
+               <span class="w-2 h-2 rounded-full bg-neutral-700"></span>
+               ${channel} · Offline
+             </span>`;
+      }
+
+      /**
+       * Banner style: full-width strip.
+       * Good for: top of blog posts, website headers.
+       */
+      function renderBanner(root, channel, live, liveUrl) {
+        if (!live) { root.innerHTML = ""; return; }
+        root.style.width = "100%";
+        root.innerHTML = `
+          <div class="w-full bg-twitch text-white text-center text-xs font-bold py-2 tracking-wide">
+            <span class="animate-pulse">🔴</span>
+            ${channel} is LIVE on Twitch right now –
+            <a href="${liveUrl}" target="_blank" rel="noopener noreferrer" class="underline ml-1 hover:text-white/90">
+              Watch Now ↗
+            </a>
+          </div>`;
+      }
+
+      async function bootstrap() {
+        const root    = document.getElementById("widget-root");
+        const style   = getParam("style", "badge");
+        const base    = getBaseUrl();
+        const liveUrl = buildLiveUrl(base);
+        const scheduleUrl = base + "schedule-embed.html";
+
+        const config = await loadConfig();
+        const channel = config?.embed?.channel || "ricktaur";
+
+        let live = false;
+        if (config?.twitch) {
+          live = await checkLive(config.twitch);
+        }
+
+        switch (style) {
+          case "card":    renderCard(root, channel, live, liveUrl, scheduleUrl); break;
+          case "minimal": renderMinimal(root, channel, live, liveUrl); break;
+          case "banner":  renderBanner(root, channel, live, liveUrl); break;
+          default:        renderBadge(root, channel, live, liveUrl); break;
+        }
+
+        // Auto-refresh every 90 seconds
+        const intervalMs = 90_000;
+        setInterval(async () => {
+          let newLive = false;
+          if (config?.twitch) newLive = await checkLive(config.twitch);
+          if (newLive !== live) {
+            live = newLive;
+            switch (style) {
+              case "card":    renderCard(root, channel, live, liveUrl, scheduleUrl); break;
+              case "minimal": renderMinimal(root, channel, live, liveUrl); break;
+              case "banner":  renderBanner(root, channel, live, liveUrl); break;
+              default:        renderBadge(root, channel, live, liveUrl); break;
+            }
+          }
+        }, intervalMs);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrap);
+      } else {
+        bootstrap().catch(() => {});
+      }
+    </script>
+  </body>
+</html>

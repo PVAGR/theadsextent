@@ -1,0 +1,133 @@
+# Netlify configuration for PVA Bazaar Universal Stream Embed
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Project root containing index.html and all embed pages
+  base = "Extensionadmoney"
+  publish = "Extensionadmoney"
+  functions = "Extensionadmoney/netlify/functions"
+
+[build.environment]
+  # NODE_VERSION is not a secret – set here for consistency
+  NODE_VERSION = "18"
+
+# --------------------------------------------------------------------------- #
+# Required environment variables – add these in Netlify Dashboard > Site
+# configuration > Environment variables (NOT committed to git)
+# --------------------------------------------------------------------------- #
+#
+#   TWITCH_CLIENT_ID      – Twitch Developer app client ID
+#   TWITCH_CLIENT_SECRET  – Twitch Developer app client secret
+#   TWITCH_CHANNEL        – your channel name (default: "ricktaur")
+#   SITE_URL              – your full Netlify URL, e.g. https://ricktaur.netlify.app
+#
+#   DISCORD_WEBHOOK_URL   – Discord server incoming webhook URL (go-live notifications)
+#   NOTIFY_SECRET         – shared secret for the /notify endpoint (set any random string)
+#   REVENUE_SECRET        – bearer token to protect the /revenue GET endpoint (optional)
+#
+# Headers – applied to all pages
+# --------------------------------------------------------------------------- #
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevent the embed pages from being framed by unauthorized origins.
+    # Update the Content-Security-Policy frame-ancestors list when you add
+    # new sites that are allowed to embed these pages.
+    X-Frame-Options = "ALLOWALL"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "autoplay=(self), fullscreen=(self)"
+
+# Allow CORS on the Netlify functions so the embeds can call them from
+# any origin (embed pages may be served from different domains).
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+
+# Cache config.json for 60 seconds (short TTL so changes propagate quickly)
+[[headers]]
+  for = "/config.json"
+  [headers.values]
+    Cache-Control = "public, max-age=60, stale-while-revalidate=300"
+
+# Cache static assets aggressively
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# --------------------------------------------------------------------------- #
+# Redirects
+# --------------------------------------------------------------------------- #
+
+# Convenience shorthand: /embed → index.html
+[[redirects]]
+  from = "/embed"
+  to = "/index.html"
+  status = 200
+
+# Stream + chat shorthand
+[[redirects]]
+  from = "/embed/stream-chat"
+  to = "/stream-chat.html"
+  status = 200
+
+# Chat-only shorthand
+[[redirects]]
+  from = "/embed/chat"
+  to = "/chat-embed.html"
+  status = 200
+
+# VOD shorthand (passes ?video= and ?clip= query params transparently)
+[[redirects]]
+  from = "/embed/vod"
+  to = "/vod-embed.html"
+  status = 200
+
+# Schedule shorthand
+[[redirects]]
+  from = "/embed/schedule"
+  to = "/schedule-embed.html"
+  status = 200
+
+# Admin shorthand
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+# Live-now page shorthands (use /live in social posts)
+[[redirects]]
+  from = "/live"
+  to = "/live-now.html"
+  status = 200
+
+[[redirects]]
+  from = "/live-now"
+  to = "/live-now.html"
+  status = 200
+
+# Go-live control panel
+[[redirects]]
+  from = "/go-live"
+  to = "/go-live.html"
+  status = 200
+
+# Widget shorthands
+[[redirects]]
+  from = "/widget"
+  to = "/widget-embed.html"
+  status = 200
+
+[[redirects]]
+  from = "/widget/:style"
+  to = "/widget-embed.html?style=:style"
+  status = 200

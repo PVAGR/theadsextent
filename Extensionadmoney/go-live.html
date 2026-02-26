@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ricktaur – Go Live Control Panel</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+    <style>
+      :root { color-scheme: dark; }
+      @keyframes pulse-ring {
+        0%   { transform: scale(1);   opacity: 1; }
+        100% { transform: scale(1.6); opacity: 0; }
+      }
+      .pulse-ring::before {
+        content: "";
+        display: block;
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        background: #9146FF;
+        animation: pulse-ring 1.4s cubic-bezier(0.4,0,0.6,1) infinite;
+      }
+    </style>
+  </head>
+
+  <body class="bg-black text-gray-100 min-h-screen">
+    <div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+
+      <!-- Header -->
+      <header class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-gray-50">Go-Live Control Panel</h1>
+          <p class="text-xs text-gray-400 mt-0.5">
+            Use this page when you start streaming. One click activates all systems.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="live-status-badge" class="inline-flex items-center gap-1.5 rounded-full bg-red-600/20 text-red-400 border border-red-600/30 px-3 py-1 text-xs font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+            Offline
+          </span>
+        </div>
+      </header>
+
+      <!-- Big activate button -->
+      <section class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-center">
+        <p class="text-sm text-gray-400 mb-4">You're about to go live. Fire all notifications and activate embed systems.</p>
+        <div class="relative inline-flex items-center justify-center mb-5">
+          <span id="go-live-pulse" class="relative inline-flex items-center justify-center w-32 h-32">
+            <button
+              id="go-live-btn"
+              type="button"
+              class="relative z-10 w-32 h-32 rounded-full bg-twitch hover:bg-twitch/90 text-white font-bold text-lg shadow-2xl shadow-twitch/50 transition active:scale-95"
+            >
+              GO LIVE
+            </button>
+          </span>
+        </div>
+        <div id="go-live-status" class="text-sm text-gray-400 min-h-[1.5rem]">
+          Fill in details below, then press GO LIVE.
+        </div>
+
+        <!-- Result panel -->
+        <div id="notification-results" class="hidden mt-4 rounded-xl border border-neutral-800 bg-neutral-950 p-4 text-xs text-left space-y-2"></div>
+      </section>
+
+      <!-- Stream details form -->
+      <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-gray-200">Stream Details</h2>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1" for="stream-title">Stream Title</label>
+          <input
+            id="stream-title"
+            type="text"
+            placeholder="e.g. Playing Elden Ring - First Playthrough!"
+            class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 focus:outline-none focus:border-twitch"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1" for="stream-game">Game / Category</label>
+          <input
+            id="stream-game"
+            type="text"
+            placeholder="e.g. Elden Ring"
+            class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 focus:outline-none focus:border-twitch"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1" for="notify-secret">Notification Secret</label>
+          <input
+            id="notify-secret"
+            type="password"
+            placeholder="Your NOTIFY_SECRET env var value"
+            class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 focus:outline-none focus:border-twitch"
+            autocomplete="current-password"
+          />
+          <p class="text-[11px] text-gray-500 mt-1">Set NOTIFY_SECRET in Netlify env vars. Stored in sessionStorage for convenience.</p>
+        </div>
+      </section>
+
+      <!-- Quick links -->
+      <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-3">
+        <h2 class="text-sm font-semibold text-gray-200">Share These Links</h2>
+        <p class="text-xs text-gray-400">Copy and post these when you go live to drive traffic.</p>
+        <div class="space-y-2" id="share-links">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Revenue snapshot -->
+      <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-semibold text-gray-200">Revenue Snapshot</h2>
+          <button id="refresh-revenue-btn" type="button" class="text-xs text-twitch hover:underline">Refresh</button>
+        </div>
+        <div id="revenue-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <!-- KPIs injected here -->
+        </div>
+        <p id="revenue-updated" class="text-[11px] text-gray-500 mt-3"></p>
+        <p class="text-[11px] text-yellow-400/70 mt-1">
+          Live data once REVENUE_SECRET + Netlify Blobs are configured. Shows last-known counts otherwise.
+        </p>
+      </section>
+
+      <!-- Donation goal quick-update -->
+      <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-3">
+        <h2 class="text-sm font-semibold text-gray-200">Donation Goal (config.json)</h2>
+        <p class="text-xs text-gray-400">
+          The goal amounts are set in <code class="text-twitch">config.json</code> → <code class="text-twitch">monetization.donations</code>.
+          Update <code>goalCurrent</code> after each stream to reflect real progress.
+        </p>
+        <div id="donation-goal-summary" class="space-y-2 text-xs">
+          <!-- Injected -->
+        </div>
+      </section>
+
+      <!-- Checker: is Twitch live? -->
+      <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-gray-200">Twitch Status Check</h2>
+          <button id="check-status-btn" type="button" class="rounded-full border border-neutral-700 text-xs text-gray-300 px-3 py-1 hover:bg-neutral-800 transition">
+            Check Now
+          </button>
+        </div>
+        <div id="twitch-status-result" class="text-xs text-gray-400">–</div>
+      </section>
+
+    </div>
+
+    <script type="module">
+      const CONFIG_PATH = "./config.json";
+      const SESSION_SECRET_KEY = "pva_golive_secret";
+
+      async function loadConfig() {
+        const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
+        if (!r.ok) throw new Error(`Config load failed: ${r.status}`);
+        return r.json();
+      }
+
+      function getBaseUrl() {
+        return window.location.origin + window.location.pathname.replace("go-live.html", "");
+      }
+
+      // Restore saved secret
+      const secretInput = document.getElementById("notify-secret");
+      if (secretInput) {
+        const saved = sessionStorage.getItem(SESSION_SECRET_KEY);
+        if (saved) secretInput.value = saved;
+        secretInput.addEventListener("input", () => {
+          sessionStorage.setItem(SESSION_SECRET_KEY, secretInput.value);
+        });
+      }
+
+      function setGoLiveStatus(msg, color = "text-gray-400") {
+        const el = document.getElementById("go-live-status");
+        if (el) { el.className = `text-sm min-h-[1.5rem] ${color}`; el.textContent = msg; }
+      }
+
+      function showResults(notifications) {
+        const panel = document.getElementById("notification-results");
+        if (!panel) return;
+        panel.classList.remove("hidden");
+        panel.replaceChildren();
+        notifications.forEach((n) => {
+          const row = document.createElement("div");
+          row.className = "flex items-center gap-2";
+          const dot = n.status === "sent"
+            ? "bg-green-500"
+            : n.status === "skipped" ? "bg-yellow-500" : "bg-red-500";
+          row.innerHTML = `
+            <span class="w-2 h-2 rounded-full ${dot} shrink-0"></span>
+            <span class="font-semibold capitalize text-gray-200">${n.destination}</span>
+            <span class="text-gray-400">${n.status}${n.reason ? ` – ${n.reason}` : ""}${n.message ? ` – ${n.message}` : ""}</span>`;
+          panel.appendChild(row);
+        });
+      }
+
+      // ── GO LIVE button ────────────────────────────────────────────────────
+      const btn = document.getElementById("go-live-btn");
+      const pulseEl = document.getElementById("go-live-pulse");
+      btn?.addEventListener("click", async () => {
+        const secret = secretInput?.value || "";
+        const title = document.getElementById("stream-title")?.value || "";
+        const game  = document.getElementById("stream-game")?.value || "";
+
+        btn.disabled = true;
+        btn.textContent = "Firing…";
+        setGoLiveStatus("Sending notifications…", "text-twitch");
+
+        try {
+          const r = await fetch("/.netlify/functions/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ secret, title, game }),
+          });
+
+          if (!r.ok) {
+            const err = await r.json().catch(() => ({}));
+            throw new Error(err.error || `HTTP ${r.status}`);
+          }
+
+          const data = await r.json();
+          setGoLiveStatus("Notifications fired! Stream is activated.", "text-green-400");
+          showResults(data.notifications || []);
+
+          // Light up the button
+          btn.textContent = "LIVE!";
+          btn.classList.replace("bg-twitch", "bg-green-600");
+          pulseEl?.classList.add("pulse-ring");
+
+          // Update live badge
+          const badge = document.getElementById("live-status-badge");
+          if (badge) {
+            badge.className = "inline-flex items-center gap-1.5 rounded-full bg-twitch/20 text-twitch border border-twitch/40 px-3 py-1 text-xs font-semibold";
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-twitch animate-pulse"></span> Live`;
+          }
+        } catch (err) {
+          setGoLiveStatus(`Error: ${err.message}`, "text-red-400");
+          btn.disabled = false;
+          btn.textContent = "GO LIVE";
+        }
+      });
+
+      // ── Share links ───────────────────────────────────────────────────────
+      function buildShareLinks() {
+        const base = getBaseUrl();
+        const channel = "ricktaur";
+        const links = [
+          { label: "Live Now Page (shareable)", url: `${base}live-now.html`, highlight: true },
+          { label: "Stream Embed", url: `${base}index.html` },
+          { label: "Stream + Chat", url: `${base}stream-chat.html` },
+          { label: "Schedule", url: `${base}schedule-embed.html` },
+          { label: "Direct Twitch", url: `https://www.twitch.tv/${channel}` },
+        ];
+
+        const container = document.getElementById("share-links");
+        if (!container) return;
+        links.forEach(({ label, url, highlight }) => {
+          const row = document.createElement("div");
+          row.className = `flex items-center gap-3 rounded-lg border ${highlight ? "border-twitch/40 bg-twitch/5" : "border-neutral-800 bg-neutral-900/40"} px-3 py-2`;
+          row.innerHTML = `
+            <span class="flex-1 text-xs ${highlight ? "text-twitch font-semibold" : "text-gray-300"} truncate">${url}</span>
+            <span class="text-[10px] text-gray-500 shrink-0">${label}</span>
+            <button
+              type="button"
+              class="shrink-0 rounded-full border border-neutral-700 text-[11px] text-gray-300 px-2 py-0.5 hover:bg-neutral-800 transition"
+              onclick="navigator.clipboard?.writeText('${url}')"
+            >Copy</button>`;
+          container.appendChild(row);
+        });
+      }
+
+      // ── Revenue snapshot ──────────────────────────────────────────────────
+      async function fetchRevenue() {
+        const secret = secretInput?.value || "";
+        try {
+          const headers = secret ? { Authorization: `Bearer ${secret}` } : {};
+          const r = await fetch("/.netlify/functions/revenue", { headers, cache: "no-store" });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        } catch {
+          return null;
+        }
+      }
+
+      function renderRevenue(data) {
+        const grid = document.getElementById("revenue-grid");
+        const updated = document.getElementById("revenue-updated");
+        if (!grid) return;
+
+        const kpis = [
+          { label: "Embed Loads", value: data?.embedLoads ?? "–" },
+          { label: "Affiliate Clicks", value: data?.affiliateClicks ?? "–" },
+          { label: "Donation Inits", value: data?.donationInitiations ?? "–" },
+          { label: "Sponsor Clicks", value: data?.sponsorClicks ?? "–" },
+        ];
+
+        grid.replaceChildren();
+        kpis.forEach(({ label, value }) => {
+          const card = document.createElement("div");
+          card.className = "rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 text-center";
+          card.innerHTML = `
+            <p class="text-lg font-bold text-gray-50">${value}</p>
+            <p class="text-[11px] text-gray-500 mt-0.5">${label}</p>`;
+          grid.appendChild(card);
+        });
+
+        if (updated && data?.lastUpdated) {
+          updated.textContent = `Last updated: ${new Date(data.lastUpdated).toLocaleString()}`;
+        }
+      }
+
+      const refreshBtn = document.getElementById("refresh-revenue-btn");
+      refreshBtn?.addEventListener("click", async () => {
+        refreshBtn.textContent = "Loading…";
+        const data = await fetchRevenue();
+        renderRevenue(data);
+        refreshBtn.textContent = "Refresh";
+      });
+
+      // ── Twitch status check ───────────────────────────────────────────────
+      const checkBtn = document.getElementById("check-status-btn");
+      checkBtn?.addEventListener("click", async () => {
+        const resultEl = document.getElementById("twitch-status-result");
+        if (resultEl) resultEl.textContent = "Checking…";
+        try {
+          const config = await loadConfig();
+          const url = new URL(config.twitch.statusProxyEndpoint, window.location.origin);
+          url.searchParams.set("channel", config.twitch.channel);
+          const r = await fetch(url.toString(), { cache: "no-store" });
+          if (!r.ok) throw new Error(`proxy error ${r.status}`);
+          const status = await r.json();
+          if (resultEl) {
+            resultEl.className = `text-xs font-semibold ${status.live ? "text-green-400" : "text-red-400"}`;
+            resultEl.textContent = status.live
+              ? `LIVE – ${config.twitch.channel} is streaming now!`
+              : `OFFLINE – ${config.twitch.channel} is not currently live.`;
+          }
+          // Also update the badge
+          const badge = document.getElementById("live-status-badge");
+          if (badge && status.live) {
+            badge.className = "inline-flex items-center gap-1.5 rounded-full bg-twitch/20 text-twitch border border-twitch/40 px-3 py-1 text-xs font-semibold";
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-twitch animate-pulse"></span> Live`;
+          }
+        } catch (err) {
+          const resultEl = document.getElementById("twitch-status-result");
+          if (resultEl) { resultEl.className = "text-xs text-red-400"; resultEl.textContent = `Error: ${err.message}`; }
+        }
+      });
+
+      // ── Donation goal summary ─────────────────────────────────────────────
+      async function renderDonationGoal() {
+        const el = document.getElementById("donation-goal-summary");
+        if (!el) return;
+        try {
+          const config = await loadConfig();
+          const d = config.monetization?.donations;
+          if (!d) return;
+          const pct = d.goalTarget > 0 ? Math.min(100, (d.goalCurrent / d.goalTarget) * 100) : 0;
+          const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+          el.innerHTML = `
+            <p class="font-semibold text-gray-100">${d.goalLabel}</p>
+            <div class="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
+              <div class="h-full bg-twitch rounded-full" style="width:${pct}%"></div>
+            </div>
+            <p class="text-gray-400">${fmt(d.goalCurrent)} of ${fmt(d.goalTarget)} (${pct.toFixed(1)}%)</p>
+            <p class="text-gray-500">Update <code class="text-twitch">goalCurrent</code> in config.json after each stream to track real progress.</p>`;
+        } catch { /* ignore */ }
+      }
+
+      // ── Init ──────────────────────────────────────────────────────────────
+      buildShareLinks();
+      renderRevenue(null);
+      renderDonationGoal();
+    </script>
+  </body>
+</html>
