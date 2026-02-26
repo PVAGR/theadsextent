@@ -368,7 +368,12 @@
           const p = affiliate.products[i];
           if (!p) return;
           const imgEl = document.getElementById("aff-img");
-          if (imgEl) imgEl.innerHTML = `<img src="${p.image}" alt="${p.title}" loading="lazy" class="w-full h-full object-cover rounded-lg" />`;
+          if (imgEl) {
+            const img = document.createElement("img");
+            img.src = p.image || ""; img.alt = p.title || "";
+            img.loading = "lazy"; img.className = "w-full h-full object-cover rounded-lg";
+            imgEl.replaceChildren(img);
+          }
           const t = document.getElementById("aff-title"); if (t) t.textContent = p.title;
           const pr = document.getElementById("aff-price"); if (pr) pr.textContent = p.price;
           const url = new URL(p.url);
@@ -405,7 +410,9 @@
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "w-full flex items-center justify-between rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 hover:bg-neutral-800 transition";
-            btn.innerHTML = `<span class="font-medium">${p.label}</span><span class="text-[10px] text-gray-400">External</span>`;
+            const s1 = document.createElement("span"); s1.className = "font-medium"; s1.textContent = p.label;
+            const s2 = document.createElement("span"); s2.className = "text-[10px] text-gray-400"; s2.textContent = "External";
+            btn.replaceChildren(s1, s2);
             btn.addEventListener("click", () => { sendBeacon(analytics, "donation_initiated", { providerId: p.id }); window.open(p.url, "_blank", "noopener,noreferrer"); });
             provEl.appendChild(btn);
           });
@@ -425,7 +432,9 @@
           const a = document.createElement("a");
           a.href = slot.url; a.target = "_blank"; a.rel = "noopener noreferrer sponsored";
           a.className = "inline-flex items-center rounded-md bg-neutral-900 border border-neutral-800 px-2 py-1 hover:bg-neutral-800 transition";
-          a.innerHTML = `<img src="${slot.logo}" alt="${slot.name}" loading="lazy" class="h-6 w-auto object-contain" />`;
+          const sImg = document.createElement("img");
+          sImg.src = slot.logo || ""; sImg.alt = slot.name || ""; sImg.loading = "lazy"; sImg.className = "h-6 w-auto object-contain";
+          a.replaceChildren(sImg);
           a.addEventListener("click", () => sendBeacon(analytics, "sponsor_click", { sponsorId: slot.id }));
           row.appendChild(a);
         });

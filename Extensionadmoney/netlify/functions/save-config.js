@@ -39,6 +39,15 @@ const BLOB_STORE = "pva-bazaar-config";
 const CONFIG_KEY = "site-config";
 const CREDS_KEY  = "twitch-config";
 
+/** Returns the URL string if it's a valid http(s) URL, otherwise null. */
+function safeUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return (u.protocol === "https:" || u.protocol === "http:") ? url : null;
+  } catch { return null; }
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: CORS, body: "" };
   if (event.httpMethod !== "POST") {
@@ -76,10 +85,14 @@ exports.handler = async (event) => {
     if (body.monetization) {
       const updatedMon = { ...(existing.monetization || {}) };
       if (body.monetization.donations) {
-        updatedMon.donations = {
-          ...(existing.monetization?.donations || {}),
-          ...body.monetization.donations,
-        };
+        const don = { ...(existing.monetization?.donations || {}), ...body.monetization.donations };
+        // Sanitize provider URLs – reject non-http(s) schemes
+        if (Array.isArray(don.providers)) {
+          don.providers = don.providers
+            .filter(p => p && typeof p.id === "string")
+            .map(p => ({ ...p, url: safeUrl(p.url) || "" }));
+        }
+        updatedMon.donations = don;
       }
       update.monetization = updatedMon;
     }

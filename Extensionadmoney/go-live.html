@@ -340,6 +340,11 @@
       const CONFIG_PATH = "/.netlify/functions/config";
       const SESSION_SECRET_KEY = "pva_golive_secret";
 
+      /** Escape HTML to prevent XSS when inserting config data via innerHTML */
+      function esc(s) {
+        return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      }
+
       async function loadConfig() {
         const r = await fetch(CONFIG_PATH, { cache: "no-cache" });
         if (!r.ok) throw new Error(`Config load failed: ${r.status}`);
@@ -378,15 +383,16 @@
             : n.status === "skipped" ? "bg-yellow-500" : "bg-red-500";
           row.innerHTML = `
             <span class="w-2 h-2 rounded-full ${dot} shrink-0"></span>
-            <span class="font-semibold capitalize text-gray-200">${n.destination}</span>
-            <span class="text-gray-400">${n.status}${n.reason ? ` – ${n.reason}` : ""}${n.message ? ` – ${n.message}` : ""}</span>`;
+            <span class="font-semibold capitalize text-gray-200">${esc(n.destination)}</span>
+            <span class="text-gray-400">${esc(n.status)}${n.reason ? ` – ${esc(n.reason)}` : ""}${n.message ? ` – ${esc(n.message)}` : ""}</span>`;
           panel.appendChild(row);
         });
       }
 
       // ── Platform Blast ────────────────────────────────────────────────────
-      const CHANNEL = "ricktaur";
-      const LIVE_URL = "https://extensionadmoney.netlify.app/live";
+      // Defaults; updated from config on load below
+      let CHANNEL = "ricktaur";
+      let LIVE_URL = window.location.origin + "/live";
 
       function buildTweetText(title, customMsg) {
         const parts = [`🔴 I'm LIVE on Twitch!`];
@@ -403,7 +409,7 @@
         const tweetText = buildTweetText(title, customMsg);
         const encodedTweet = encodeURIComponent(tweetText);
         const encodedUrl = encodeURIComponent(LIVE_URL);
-        const redditTitle = encodeURIComponent(`ricktaur is LIVE on Twitch!${title ? ` – ${title}` : ""}`);
+        const redditTitle = encodeURIComponent(`${CHANNEL} is LIVE on Twitch!${title ? ` – ${title}` : ""}`);
 
         const urls = {
           twitter: `https://twitter.com/intent/tweet?text=${encodedTweet}`,
@@ -615,12 +621,42 @@
           const pct = d.goalTarget > 0 ? Math.min(100, (d.goalCurrent / d.goalTarget) * 100) : 0;
           const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
           el.innerHTML = `
-            <p class="font-semibold text-gray-100">${d.goalLabel}</p>
+            <p class="font-semibold text-gray-100">${esc(d.goalLabel)}</p>
             <div class="w-full h-2 rounded-full bg-neutral-800 overflow-hidden">
               <div class="h-full bg-twitch rounded-full" style="width:${pct}%"></div>
             </div>
             <p class="text-gray-400">${fmt(d.goalCurrent)} of ${fmt(d.goalTarget)} (${pct.toFixed(1)}%)</p>
             <p class="text-gray-500">Update the goal amount any time at <a href="/setup" class="text-twitch hover:underline">/setup</a>.</p>`;
+
+          // Quick inline update for goalCurrent
+          const updateRow = document.createElement("div");
+          updateRow.className = "flex items-center gap-2 mt-1 pt-2 border-t border-neutral-800";
+          const lbl = document.createElement("label");
+          lbl.className = "text-xs text-gray-400 shrink-0"; lbl.textContent = "Update raised: $";
+          const inp = document.createElement("input");
+          inp.type = "number"; inp.min = "0"; inp.step = "1"; inp.value = d.goalCurrent;
+          inp.className = "w-24 rounded-lg bg-neutral-800 border border-neutral-700 text-gray-100 text-xs px-2 py-1 focus:outline-none focus:border-twitch";
+          const saveBtn = document.createElement("button");
+          saveBtn.type = "button"; saveBtn.textContent = "Save";
+          saveBtn.className = "rounded-full bg-neutral-700 hover:bg-neutral-600 text-white text-xs px-3 py-1 transition";
+          const statusSpan = document.createElement("span");
+          statusSpan.className = "text-xs text-gray-500";
+          saveBtn.addEventListener("click", async () => {
+            saveBtn.textContent = "Saving…"; saveBtn.disabled = true;
+            try {
+              const secret = sessionStorage.getItem(SESSION_SECRET_KEY) || "";
+              const r = await fetch("/.netlify/functions/save-config", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ secret: secret || undefined, monetization: { donations: { goalCurrent: +inp.value } } }),
+              });
+              const data = await r.json();
+              statusSpan.textContent = data.ok ? "Saved ✓" : (data.error || "Error");
+              if (data.ok) { setTimeout(() => { statusSpan.textContent = ""; }, 3000); renderDonationGoal(); }
+            } catch (err) { statusSpan.textContent = "Error: " + err.message; }
+            finally { saveBtn.textContent = "Save"; saveBtn.disabled = false; }
+          });
+          updateRow.append(lbl, inp, saveBtn, statusSpan);
+          el.appendChild(updateRow);
         } catch { /* ignore */ }
       }
 
@@ -723,6 +759,10 @@
       buildShareLinks();
       renderRevenue(null);
       renderDonationGoal();
+      // Load channel/URL from config so blasts use the correct channel name
+      loadConfig().then(cfg => {
+        CHANNEL = cfg.embed?.channel || cfg.twitch?.channel || CHANNEL;
+      }).catch(() => {});
     </script>
   </body>
 </html>

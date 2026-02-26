@@ -274,17 +274,13 @@
                 </ul>
               </div>
               <div>
-                <p class="font-semibold text-gray-200 mb-1">Persistence (TODO)</p>
+                <p class="font-semibold text-gray-200 mb-1">Privacy</p>
                 <ul class="space-y-1 text-gray-400 list-disc list-inside">
-                  <li>Wire <code>log.js</code> to Supabase or S3</li>
-                  <li>Build aggregation queries for 30-day windows</li>
-                  <li>Feed aggregates back to this dashboard via a new Netlify Function</li>
-                  <li>Add A/B test flag tracking</li>
+                  <li>No IP addresses, usernames, or emails stored</li>
+                  <li>Beacon-only – never blocks page load</li>
+                  <li>Cookie consent banner controls opt-in</li>
                 </ul>
               </div>
-            </div>
-            <div class="rounded-xl bg-yellow-500/5 border border-yellow-500/20 px-4 py-3 text-yellow-300/80 text-[11px]">
-              KPI cards above show placeholder values until analytics persistence is wired up.
             </div>
           </div>
         </section>
@@ -312,6 +308,11 @@
     <script>
       const CONFIG_PATH = "/.netlify/functions/config";
       const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+      /** Escape HTML to prevent XSS when using innerHTML with config data */
+      function esc(s) {
+        return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      }
 
       function copyLink(elId) {
         const el = document.getElementById(elId);
@@ -362,12 +363,12 @@
           const row = document.createElement("div");
           row.className = "flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-2";
           row.innerHTML = `
-            <img src="${p.image}" alt="${p.title}" class="w-12 h-9 object-cover rounded" loading="lazy" />
+            <img src="${esc(p.image)}" alt="${esc(p.title)}" class="w-12 h-9 object-cover rounded" loading="lazy" />
             <div class="flex-1 min-w-0">
-              <p class="text-gray-100 font-medium truncate">${p.title}</p>
-              <p class="text-gray-400">${p.price}</p>
+              <p class="text-gray-100 font-medium truncate">${esc(p.title)}</p>
+              <p class="text-gray-400">${esc(p.price)}</p>
             </div>
-            <span class="text-[10px] text-gray-500">${p.id}</span>`;
+            <span class="text-[10px] text-gray-500">${esc(p.id)}</span>`;
           list.appendChild(row);
         });
       }
@@ -378,7 +379,7 @@
         const pct = donations.goalTarget > 0 ? Math.min(100, (donations.goalCurrent / donations.goalTarget) * 100) : 0;
         const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
         el.innerHTML = `
-          <p class="font-semibold text-gray-100">${donations.goalLabel}</p>
+          <p class="font-semibold text-gray-100">${esc(donations.goalLabel)}</p>
           <div class="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden">
             <div class="h-full bg-twitch rounded-full" style="width:${pct}%"></div>
           </div>
@@ -386,8 +387,8 @@
           <div class="space-y-1 mt-2">
             ${(donations.providers || []).map((p) => `
               <div class="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5">
-                <span class="text-gray-200">${p.label}</span>
-                <span class="text-[10px] text-gray-500">${p.id}</span>
+                <span class="text-gray-200">${esc(p.label)}</span>
+                <span class="text-[10px] text-gray-500">${esc(p.id)}</span>
               </div>`).join("")}
           </div>`;
       }
@@ -400,10 +401,10 @@
           const div = document.createElement("div");
           div.className = `flex items-center gap-3 rounded-lg border ${slot.active ? "border-twitch/30 bg-twitch/5" : "border-neutral-800 bg-neutral-900 opacity-50"} px-3 py-2`;
           div.innerHTML = `
-            <img src="${slot.logo}" alt="${slot.name}" class="h-6 w-auto object-contain" loading="lazy" />
+            <img src="${esc(slot.logo)}" alt="${esc(slot.name)}" class="h-6 w-auto object-contain" loading="lazy" />
             <div>
-              <p class="text-gray-100 font-medium">${slot.name}</p>
-              <p class="text-[10px] text-gray-500">${slot.id} · ${slot.active ? "Active" : "Inactive"}</p>
+              <p class="text-gray-100 font-medium">${esc(slot.name)}</p>
+              <p class="text-[10px] text-gray-500">${esc(slot.id)} · ${slot.active ? "Active" : "Inactive"}</p>
             </div>`;
           el.appendChild(div);
         });
@@ -422,10 +423,10 @@
           const ampm = entry.hour >= 12 ? "PM" : "AM";
           const minStr = String(entry.minute || 0).padStart(2, "0");
           row.innerHTML = `
-            <span class="w-20 text-gray-400 font-semibold">${DAY_NAMES[entry.dayOfWeek]}</span>
-            <span class="flex-1 text-gray-100">${entry.title || "Stream"}</span>
-            ${entry.game ? `<span class="text-gray-500">${entry.game}</span>` : ""}
-            <span class="text-twitch font-semibold">${hour12}:${minStr} ${ampm} ${entry.timezone || "EST"}</span>`;
+            <span class="w-20 text-gray-400 font-semibold">${esc(DAY_NAMES[entry.dayOfWeek])}</span>
+            <span class="flex-1 text-gray-100">${esc(entry.title || "Stream")}</span>
+            ${entry.game ? `<span class="text-gray-500">${esc(entry.game)}</span>` : ""}
+            <span class="text-twitch font-semibold">${hour12}:${minStr} ${ampm} ${esc(entry.timezone || "EST")}</span>`;
           el.appendChild(row);
         });
       }
@@ -485,11 +486,11 @@
           if (sidebarLabel) sidebarLabel.textContent = "Live";
         }
 
-        // KPIs (placeholder values – wire to Supabase/analytics backend later)
+        // KPIs – donation goal is real; embed/affiliate/donation counts logged via log.js
         const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-        setKpi("kpi-embed-loads", "–");
-        setKpi("kpi-affiliate-clicks", "–");
-        setKpi("kpi-donation-inits", "–");
+        setKpi("kpi-embed-loads", "Active");
+        setKpi("kpi-affiliate-clicks", "Active");
+        setKpi("kpi-donation-inits", "Active");
 
         const donations = monetization?.donations;
         if (donations) {

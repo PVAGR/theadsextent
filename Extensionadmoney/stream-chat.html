@@ -365,7 +365,9 @@
         function render(i) {
           const p = affiliate.products[i];
           if (!p) return;
-          imgShell.innerHTML = `<img src="${p.image}" alt="${p.title}" loading="lazy" class="w-full h-full object-cover rounded-md" />`;
+          const si = document.createElement("img");
+          si.src = p.image || ""; si.alt = p.title || ""; si.loading = "lazy"; si.className = "w-full h-full object-cover rounded-md";
+          imgShell.replaceChildren(si);
           titleEl.textContent = p.title;
           priceEl.textContent = p.price;
           const url = new URL(p.url);
@@ -405,7 +407,9 @@
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "w-full flex items-center justify-between rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 hover:bg-neutral-800 transition";
-          btn.innerHTML = `<span class="font-medium">${prov.label}</span><span class="text-[10px] text-gray-400">External</span>`;
+          const s1 = document.createElement("span"); s1.className = "font-medium"; s1.textContent = prov.label;
+          const s2 = document.createElement("span"); s2.className = "text-[10px] text-gray-400"; s2.textContent = "External";
+          btn.replaceChildren(s1, s2);
           btn.addEventListener("click", () => {
             sendBeacon(analytics, "donation_initiated", { providerId: prov.id });
             window.open(prov.url, "_blank", "noopener,noreferrer");
@@ -430,7 +434,9 @@
           a.target = "_blank";
           a.rel = "noopener noreferrer sponsored";
           a.className = "inline-flex items-center rounded-md bg-neutral-900 border border-neutral-800 px-2 py-1 hover:bg-neutral-800 transition";
-          a.innerHTML = `<img src="${slot.logo}" alt="${slot.name}" loading="lazy" class="h-6 w-auto object-contain" />`;
+          const aImg = document.createElement("img");
+          aImg.src = slot.logo || ""; aImg.alt = slot.name || ""; aImg.loading = "lazy"; aImg.className = "h-6 w-auto object-contain";
+          a.replaceChildren(aImg);
           a.addEventListener("click", () => sendBeacon(analytics, "sponsor_click", { sponsorId: slot.id }));
           row.appendChild(a);
         });

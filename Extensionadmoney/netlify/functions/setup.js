@@ -21,6 +21,15 @@ const CORS = {
 const BLOB_STORE = "pva-bazaar-config";
 const BLOB_KEY   = "twitch-config";
 
+/** Returns the URL string if it's a valid https URL, otherwise null. */
+function safeUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" ? url : null;
+  } catch { return null; }
+}
+
 async function getBlobStore() {
   const { getStore } = await import("@netlify/blobs");
   return getStore(BLOB_STORE);
@@ -109,12 +118,13 @@ exports.handler = async (event) => {
     // Save to Blobs
     try {
       const store = await getBlobStore();
+      const webhook = body.discordWebhook?.trim() || null;
       await store.setJSON(BLOB_KEY, {
         clientId:       clientId.trim(),
         clientSecret:   clientSecret.trim(),
         channel:        channel.trim(),
         notifySecret:   body.notifySecret?.trim()    || null,
-        discordWebhook: body.discordWebhook?.trim()  || null,
+        discordWebhook: safeUrl(webhook),
         savedAt:        new Date().toISOString(),
       });
     } catch (e) {

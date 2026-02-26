@@ -303,7 +303,7 @@
         });
         container.querySelectorAll(".remove-slot").forEach(el => {
           el.addEventListener("click", e => {
-            scheduleSlots.splice(+e.target.dataset.idx, 1);
+            scheduleSlots.splice(+e.currentTarget.dataset.idx, 1);
             renderSlots();
           });
         });
