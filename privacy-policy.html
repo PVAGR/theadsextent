@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Privacy Policy for PVA Bazaar Stream Ecosystem" />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src  'self';
+    style-src   'self' 'unsafe-inline';
+    img-src     'self' data:;
+    frame-src   'none';
+    connect-src 'self';
+    object-src  'none';
+    base-uri    'self';
+    form-action 'self';
+  " />
+  <title>Privacy Policy — PVA Bazaar Stream</title>
+  <link rel="stylesheet" href="/src/css/main-styles.css" />
+  <style>
+    .prose { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    .prose h1 { font-size: 1.8rem; margin-bottom: .5rem; }
+    .prose h2 { font-size: 1.2rem; margin-top: 2rem; margin-bottom: .5rem; color: var(--color-primary); }
+    .prose p, .prose li { color: var(--color-text-muted); line-height: 1.8; margin-bottom: .75rem; }
+    .prose ul { padding-left: 1.5rem; }
+    .prose a { color: var(--color-link); }
+    .prose .updated { font-size: .85rem; color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+
+  <header class="site-header" role="banner">
+    <div class="container">
+      <a href="/" class="site-header__brand" aria-label="Back to stream">
+        <span aria-hidden="true">📺</span>
+        <span>PVA Bazaar <span class="dot">•</span> ricktaur</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="prose" id="main-content">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: February 2026 &bull; Version 1.0.0</p>
+
+    <h2>1. Overview</h2>
+    <p>
+      This Privacy Policy explains how PVA Bazaar / ricktaur ("we", "us", "our") collects,
+      uses, and protects information when you visit the PVA Bazaar Stream embed pages.
+      We are committed to protecting your privacy and complying with the
+      General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
+    </p>
+
+    <h2>2. Data We Collect</h2>
+    <p>
+      We only collect <strong>anonymised, non-personal</strong> analytics data for the
+      purpose of academic research and service improvement. Specifically:
+    </p>
+    <ul>
+      <li><strong>embed_loaded</strong> — timestamp, domain, device type (mobile/tablet/desktop)</li>
+      <li><strong>stream_status_change</strong> — whether the channel went live or offline</li>
+      <li><strong>affiliate_click</strong> — which product category was clicked (no personal ID)</li>
+      <li><strong>donation_initiated</strong> — amount and currency (no payment details)</li>
+      <li><strong>time_watched</strong> — estimated session duration in seconds</li>
+      <li><strong>bounce</strong> — whether the page was left within 10 seconds</li>
+    </ul>
+    <p>
+      We <strong>do not</strong> collect IP addresses, names, email addresses, exact geographic
+      locations, or any other Personally Identifiable Information (PII).
+      User session identifiers are one-way hashed (SHA-256) before storage.
+    </p>
+
+    <h2>3. Your Consent</h2>
+    <p>
+      Analytics are only enabled after you click "Accept" on the cookie consent banner.
+      You may withdraw consent at any time by clicking "Decline" on the banner.
+      If you decline, no analytics events will be sent.
+    </p>
+
+    <h2>4. How We Use Your Data</h2>
+    <p>Analytics data is used solely for:</p>
+    <ul>
+      <li>Improving the streaming experience and embed performance.</li>
+      <li>Academic research into creator-owned streaming infrastructure
+          (PhD thesis, Ethics and Economics of the Creator Economy).
+          All research data is fully anonymised before analysis.</li>
+    </ul>
+
+    <h2>5. Data Retention</h2>
+    <p>
+      Raw event logs are automatically purged after 12 months.
+      Only aggregate statistics (counts, averages) are retained beyond that point.
+    </p>
+
+    <h2 id="affiliate">6. Affiliate Disclosure</h2>
+    <p>
+      This site contains affiliate links. When you click an affiliate link and make a
+      purchase, we may earn a commission at no extra cost to you.
+      As an Amazon Associate we earn from qualifying purchases.
+      All affiliate links are clearly identified and marked with <code>rel="sponsored"</code>.
+      Affiliate clicks are tracked via UTM parameters appended to the URL
+      (<code>utm_source=embed&amp;utm_medium=affiliate&amp;utm_campaign=ricktaur</code>).
+    </p>
+
+    <h2>7. Third-Party Services</h2>
+    <p>
+      This site embeds content from <a href="https://www.twitch.tv" target="_blank" rel="noopener noreferrer">Twitch</a>,
+      which has its own <a href="https://www.twitch.tv/p/en/legal/privacy-notice/" target="_blank" rel="noopener noreferrer">Privacy Notice</a>.
+      Payment processing is handled by PayPal and Stripe, which have their own privacy policies.
+      We do not share your data with third parties for advertising purposes.
+    </p>
+
+    <h2>8. Your Rights (GDPR / CCPA)</h2>
+    <p>You have the right to:</p>
+    <ul>
+      <li><strong>Access</strong> — request a copy of any data held about you.</li>
+      <li><strong>Deletion</strong> — request deletion of your data (note: our data is anonymised and cannot be linked back to you).</li>
+      <li><strong>Opt-Out</strong> — decline analytics tracking via the consent banner.</li>
+      <li><strong>Non-Discrimination</strong> — we will never discriminate against users who opt out.</li>
+    </ul>
+    <p>
+      To exercise your rights, contact:
+      <a href="mailto:privacy@pvabazaar.com">privacy@pvabazaar.com</a>
+    </p>
+
+    <h2>9. Security</h2>
+    <p>
+      All data is transmitted over HTTPS. We implement Content Security Policy (CSP) headers,
+      rate limiting on API endpoints, and regular security audits.
+      No sensitive financial or personal data is stored on our servers.
+    </p>
+
+    <h2>10. Changes to This Policy</h2>
+    <p>
+      We may update this policy periodically. Changes will be posted on this page
+      with an updated date. Continued use of the site constitutes acceptance of
+      the updated policy.
+    </p>
+
+    <p>
+      <a href="/">&larr; Return to Stream</a>
+    </p>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>
+        &copy; <span id="footer-year"></span> PVA Bazaar / ricktaur
+      </p>
+    </div>
+  </footer>
+
+  <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

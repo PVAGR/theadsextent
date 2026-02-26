@@ -1,0 +1,108 @@
+# .github/workflows/deploy.yml
+# CI/CD pipeline for the PVA Bazaar Stream Ecosystem.
+# Runs linting and security checks on every push, then deploys to GitHub Pages on main.
+
+name: CI / Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '*/5 * * * *'   # Every 5 minutes (used for stream health check)
+
+# Minimal permissions — only request what is needed
+permissions:
+  contents: read
+  pages:    write
+  id-token: write
+
+# Allow only one concurrent deployment to avoid race conditions
+concurrency:
+  group:              pages
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 1: Lint & Security Scan
+  # Runs on every push and PR to prevent regressions.
+  # ─────────────────────────────────────────────────────────────────────────
+  lint-and-scan:
+    name: Lint & Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Run security audit
+        run: npm audit --audit-level=high
+
+      - name: Lint JavaScript
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm test
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 2: Deploy to GitHub Pages (main branch only)
+  # ─────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: lint-and-scan
+    if: >
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url:  ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Deploy the entire repository root (static site)
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 3: Scheduled Stream Status Cache Purge (every 5 minutes)
+  # Triggers a lightweight CDN/cache bust so embed pages reflect live status.
+  # ─────────────────────────────────────────────────────────────────────────
+  stream-health-check:
+    name: Stream Health Check
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check stream status via serverless proxy
+        run: |
+          STATUS=$(curl -sf "${{ vars.STREAM_STATUS_URL || 'https://your-netlify-site.netlify.app/api/stream-status?channel=ricktaur' }}" || echo '{"live":false}')
+          echo "Stream status: $STATUS"
+
+      - name: Purge CDN cache (if applicable)
+        run: |
+          echo "Cache purge step: configure your CDN provider here (Cloudflare, Netlify, etc.)."
+          # Example Cloudflare purge (add CF_ZONE_ID + CF_API_TOKEN to GitHub Secrets):
+          # curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONE_ID }}/purge_cache" \
+          #   -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+          #   -H "Content-Type: application/json" \
+          #   --data '{"purge_everything":true}'

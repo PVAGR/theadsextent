@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "embed": {
+    "channel": "ricktaur",
+    "autoplay": true,
+    "muted": true,
+    "chat_enabled": true,
+    "theme_color": "#9146FF",
+    "offline_message": "Catch the next stream at 8 PM EST!",
+    "schedule": [
+      { "day": "Tuesday",   "time": "8 PM EST" },
+      { "day": "Thursday",  "time": "8 PM EST" },
+      { "day": "Saturday",  "time": "3 PM EST" }
+    ],
+    "vod_links": [
+      { "title": "Latest Highlights", "url": "https://www.twitch.tv/ricktaur/videos" },
+      { "title": "YouTube Channel",   "url": "https://www.youtube.com/@ricktaur" }
+    ],
+    "notify_url": "https://www.twitch.tv/ricktaur",
+    "chat_filter_keywords": ["spam", "bot", "hate"]
+  },
+  "monetization": {
+    "affiliate_rotation_interval_ms": 60000,
+    "affiliates": [
+      {
+        "id": "aff-001",
+        "title": "Gaming Headset Pro",
+        "image": "https://via.placeholder.com/200x150?text=Gaming+Headset",
+        "link": "https://example.com/affiliate/headset",
+        "price": "$59.99",
+        "alt": "High-quality gaming headset"
+      },
+      {
+        "id": "aff-002",
+        "title": "Stream Deck Mini",
+        "image": "https://via.placeholder.com/200x150?text=Stream+Deck",
+        "link": "https://example.com/affiliate/streamdeck",
+        "price": "$79.99",
+        "alt": "Compact stream deck controller"
+      },
+      {
+        "id": "aff-003",
+        "title": "Capture Card HD",
+        "image": "https://via.placeholder.com/200x150?text=Capture+Card",
+        "link": "https://example.com/affiliate/capture-card",
+        "price": "$149.99",
+        "alt": "HD capture card for streaming"
+      },
+      {
+        "id": "aff-004",
+        "title": "PVA Bazaar Sourcing Guide",
+        "image": "https://via.placeholder.com/200x150?text=PVA+Guide",
+        "link": "https://pvabazaar.com/guide",
+        "price": "$29.99",
+        "alt": "PVA Bazaar product sourcing guide"
+      },
+      {
+        "id": "aff-005",
+        "title": "Blue Yeti Microphone",
+        "image": "https://via.placeholder.com/200x150?text=Microphone",
+        "link": "https://example.com/affiliate/microphone",
+        "price": "$129.99",
+        "alt": "Blue Yeti USB microphone"
+      }
+    ],
+    "donation": {
+      "paypal_button_id": "YOUR_PAYPAL_BUTTON_ID",
+      "stripe_payment_link": "https://buy.stripe.com/YOUR_LINK",
+      "goals": [
+        {
+          "id": "goal-001",
+          "label": "New Camera Fund",
+          "current": 250,
+          "target": 1000,
+          "currency": "USD"
+        }
+      ]
+    },
+    "sponsors": [
+      {
+        "id": "sponsor-001",
+        "name": "PVA Bazaar",
+        "logo": "https://via.placeholder.com/120x50?text=PVA+Bazaar",
+        "url": "https://pvabazaar.com",
+        "alt": "PVA Bazaar logo",
+        "expires": "2026-12-31"
+      }
+    ],
+    "storefront_url": "https://pvabazaar.gumroad.com"
+  },
+  "analytics": {
+    "enabled": true,
+    "endpoint": "/api/log",
+    "consent_required": true,
+    "data_retention_days": 365
+  },
+  "security": {
+    "csp_enabled": true,
+    "rate_limit_per_hour": 100
+  },
+  "ab_test": {
+    "donate_button_color": {
+      "group_a": "#ff4444",
+      "group_b": "#22c55e"
+    }
+  }
+}
