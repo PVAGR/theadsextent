@@ -108,6 +108,63 @@
         </div>
       </section>
 
+      <!-- Platform Blast -->
+      <section class="rounded-2xl border border-twitch/30 bg-twitch/5 p-5 space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="text-base">🚀</span>
+          <h2 class="text-sm font-semibold text-gray-200">Platform Blast</h2>
+          <span class="ml-auto text-[10px] text-gray-500">Fires automatically on GO LIVE — or press manually</span>
+        </div>
+        <p class="text-xs text-gray-400">Blast your stream to every platform at once. Each button opens a pre-filled post so you can share in one click.</p>
+
+        <!-- Tweet text customiser -->
+        <div>
+          <label class="block text-xs text-gray-400 mb-1" for="blast-custom-text">Custom message (added to all posts)</label>
+          <input
+            id="blast-custom-text"
+            type="text"
+            placeholder="e.g. Come hang! !commands for info 🎮"
+            class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 focus:outline-none focus:border-twitch"
+          />
+        </div>
+
+        <!-- Platform buttons -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="platform-blast-btns">
+          <button type="button" data-platform="twitter"
+            class="flex items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-sky-500/60 hover:bg-sky-500/10 text-gray-200 text-xs font-medium px-3 py-2.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.265 5.638L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Post on X
+          </button>
+          <button type="button" data-platform="reddit"
+            class="flex items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-orange-500/60 hover:bg-orange-500/10 text-gray-200 text-xs font-medium px-3 py-2.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+            Post on Reddit
+          </button>
+          <button type="button" data-platform="facebook"
+            class="flex items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-blue-500/60 hover:bg-blue-500/10 text-gray-200 text-xs font-medium px-3 py-2.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Share on Facebook
+          </button>
+          <button type="button" data-platform="copy-tweet"
+            class="flex items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-twitch/60 hover:bg-twitch/10 text-gray-200 text-xs font-medium px-3 py-2.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Tweet Text
+          </button>
+          <button type="button" data-platform="copy-link"
+            class="flex items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-green-500/60 hover:bg-green-500/10 text-gray-200 text-xs font-medium px-3 py-2.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Copy Live Link
+          </button>
+          <button type="button" data-platform="blast-all"
+            class="flex items-center justify-center gap-2 rounded-xl border border-twitch/50 bg-twitch/20 hover:bg-twitch/30 text-twitch text-xs font-bold px-3 py-2.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"/></svg>
+            BLAST ALL
+          </button>
+        </div>
+
+        <div id="blast-feedback" class="hidden text-xs text-green-400 text-center py-1"></div>
+      </section>
+
       <!-- Quick links -->
       <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-3">
         <h2 class="text-sm font-semibold text-gray-200">Share These Links</h2>
@@ -205,6 +262,70 @@
         });
       }
 
+      // ── Platform Blast ────────────────────────────────────────────────────
+      const CHANNEL = "ricktaur";
+      const LIVE_URL = "https://extensionadmoney.netlify.app/live";
+
+      function buildTweetText(title, customMsg) {
+        const parts = [`🔴 I'm LIVE on Twitch!`];
+        if (title) parts.push(`Playing: ${title}`);
+        if (customMsg) parts.push(customMsg);
+        parts.push(`Watch now 👉 ${LIVE_URL}`);
+        parts.push(`\nhttps://www.twitch.tv/${CHANNEL}`);
+        return parts.join("\n");
+      }
+
+      function openPlatform(platform) {
+        const title = document.getElementById("stream-title")?.value || "";
+        const customMsg = document.getElementById("blast-custom-text")?.value || "";
+        const tweetText = buildTweetText(title, customMsg);
+        const encodedTweet = encodeURIComponent(tweetText);
+        const encodedUrl = encodeURIComponent(LIVE_URL);
+        const redditTitle = encodeURIComponent(`ricktaur is LIVE on Twitch!${title ? ` – ${title}` : ""}`);
+
+        const urls = {
+          twitter: `https://twitter.com/intent/tweet?text=${encodedTweet}`,
+          reddit:  `https://www.reddit.com/submit?url=${encodedUrl}&title=${redditTitle}`,
+          facebook:`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+        };
+
+        if (platform === "copy-tweet") {
+          navigator.clipboard?.writeText(tweetText);
+          showBlastFeedback("Tweet text copied to clipboard!");
+          return;
+        }
+        if (platform === "copy-link") {
+          navigator.clipboard?.writeText(LIVE_URL);
+          showBlastFeedback("Live link copied to clipboard!");
+          return;
+        }
+        if (platform === "blast-all") {
+          // Open all three with a tiny delay so browsers don't block them
+          ["twitter", "reddit", "facebook"].forEach((p, i) => {
+            setTimeout(() => window.open(urls[p], "_blank", "noopener,width=600,height=500"), i * 300);
+          });
+          navigator.clipboard?.writeText(LIVE_URL);
+          showBlastFeedback("All platforms opened + live link copied!");
+          return;
+        }
+        if (urls[platform]) {
+          window.open(urls[platform], "_blank", "noopener,width=600,height=500");
+        }
+      }
+
+      function showBlastFeedback(msg) {
+        const el = document.getElementById("blast-feedback");
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.remove("hidden");
+        setTimeout(() => el.classList.add("hidden"), 3000);
+      }
+
+      document.getElementById("platform-blast-btns")?.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-platform]");
+        if (btn) openPlatform(btn.dataset.platform);
+      });
+
       // ── GO LIVE button ────────────────────────────────────────────────────
       const btn = document.getElementById("go-live-btn");
       const pulseEl = document.getElementById("go-live-pulse");
@@ -232,6 +353,9 @@
           const data = await r.json();
           setGoLiveStatus("Notifications fired! Stream is activated.", "text-green-400");
           showResults(data.notifications || []);
+
+          // Auto-blast all platforms
+          setTimeout(() => openPlatform("blast-all"), 600);
 
           // Light up the button
           btn.textContent = "LIVE!";
