@@ -165,6 +165,82 @@
         <div id="blast-feedback" class="hidden text-xs text-green-400 text-center py-1"></div>
       </section>
 
+      <!-- AI Promo Generator -->
+      <section class="rounded-2xl border border-green-500/20 bg-green-500/5 p-5 space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="text-base">✍️</span>
+          <h2 class="text-sm font-semibold text-gray-200">AI Promo Writer</h2>
+          <span class="ml-auto text-[10px] text-gray-500">Writes your posts for you</span>
+        </div>
+        <p class="text-xs text-gray-400">
+          Fill in your stream details above, then press Generate — AI writes ready-to-post tweets, Reddit posts, and Discord announcements for you instantly.
+        </p>
+
+        <button
+          id="generate-promo-btn"
+          type="button"
+          class="w-full rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-semibold py-2.5 transition active:scale-95"
+        >
+          Generate Promo Posts
+        </button>
+
+        <div id="promo-status" class="hidden text-xs text-center text-gray-400"></div>
+
+        <!-- Results -->
+        <div id="promo-results" class="hidden space-y-3">
+
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-semibold text-sky-400">Tweet / X Post</p>
+              <button type="button" onclick="copyPromo('promo-tweet')" class="text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+            <p id="promo-tweet" class="text-xs text-gray-300 whitespace-pre-wrap"></p>
+          </div>
+
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-semibold text-orange-400">Reddit Post Title</p>
+              <button type="button" onclick="copyPromo('promo-reddit-title')" class="text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+            <p id="promo-reddit-title" class="text-xs text-gray-300 whitespace-pre-wrap"></p>
+          </div>
+
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-semibold text-orange-400">Reddit Post Body</p>
+              <button type="button" onclick="copyPromo('promo-reddit-body')" class="text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+            <p id="promo-reddit-body" class="text-xs text-gray-300 whitespace-pre-wrap"></p>
+          </div>
+
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-semibold text-indigo-400">Discord Announcement</p>
+              <button type="button" onclick="copyPromo('promo-discord')" class="text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+            <p id="promo-discord" class="text-xs text-gray-300 whitespace-pre-wrap"></p>
+          </div>
+
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <p class="text-[11px] font-semibold text-yellow-400">Hype One-Liner</p>
+              <button type="button" onclick="copyPromo('promo-hype')" class="text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+            <p id="promo-hype" class="text-xs text-gray-300 whitespace-pre-wrap"></p>
+          </div>
+
+          <button type="button" id="blast-with-promo-btn"
+            class="w-full rounded-xl border border-twitch/50 bg-twitch/20 hover:bg-twitch/30 text-twitch text-xs font-bold py-2.5 transition">
+            Use Tweet + Blast All Platforms
+          </button>
+        </div>
+
+        <p id="promo-api-note" class="hidden text-[10px] text-yellow-400/70">
+          Add <code class="text-yellow-300">ANTHROPIC_API_KEY</code> to Netlify environment variables to enable AI generation.
+          Get a free key at <span class="text-yellow-300">console.anthropic.com</span>
+        </p>
+      </section>
+
       <!-- Embed Everywhere -->
       <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-4">
         <div class="flex items-center gap-2">
@@ -556,6 +632,92 @@
         const btn = el.nextElementSibling;
         if (btn) { const orig = btn.textContent; btn.textContent = "Copied!"; setTimeout(() => btn.textContent = orig, 1500); }
       };
+
+      // ── AI Promo Writer ───────────────────────────────────────────────────
+      window.copyPromo = function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        navigator.clipboard?.writeText(el.textContent.trim());
+        const btn = el.closest(".space-y-1")?.querySelector("button");
+        if (btn) { const orig = btn.textContent; btn.textContent = "Copied!"; setTimeout(() => btn.textContent = orig, 1500); }
+      };
+
+      document.getElementById("generate-promo-btn")?.addEventListener("click", async () => {
+        const genBtn    = document.getElementById("generate-promo-btn");
+        const statusEl  = document.getElementById("promo-status");
+        const resultsEl = document.getElementById("promo-results");
+        const apiNote   = document.getElementById("promo-api-note");
+
+        const title     = document.getElementById("stream-title")?.value || "";
+        const game      = document.getElementById("stream-game")?.value  || "";
+        const customMsg = document.getElementById("blast-custom-text")?.value || "";
+
+        genBtn.disabled  = true;
+        genBtn.textContent = "Generating…";
+        statusEl.textContent = "Calling AI…";
+        statusEl.classList.remove("hidden");
+        resultsEl.classList.add("hidden");
+        apiNote.classList.add("hidden");
+
+        try {
+          const r = await fetch("/.netlify/functions/generate-promo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, game, customMsg }),
+          });
+          const data = await r.json();
+
+          if (data.fallback) {
+            statusEl.textContent = data.message || "API key not configured.";
+            apiNote.classList.remove("hidden");
+            return;
+          }
+          if (!r.ok || !data.success) {
+            throw new Error(data.error || `HTTP ${r.status}`);
+          }
+
+          const posts = data.posts;
+          document.getElementById("promo-tweet").textContent          = posts.tweet          || "";
+          document.getElementById("promo-reddit-title").textContent   = posts.reddit_title   || "";
+          document.getElementById("promo-reddit-body").textContent    = posts.reddit_body    || "";
+          document.getElementById("promo-discord").textContent        = posts.discord        || "";
+          document.getElementById("promo-hype").textContent           = posts.hype           || "";
+
+          statusEl.classList.add("hidden");
+          resultsEl.classList.remove("hidden");
+        } catch (err) {
+          statusEl.textContent = `Error: ${err.message}`;
+        } finally {
+          genBtn.disabled = false;
+          genBtn.textContent = "Generate Promo Posts";
+        }
+      });
+
+      document.getElementById("blast-with-promo-btn")?.addEventListener("click", () => {
+        const generatedTweet = document.getElementById("promo-tweet")?.textContent.trim();
+        if (generatedTweet) {
+          // Temporarily override the custom text field so buildTweetText picks it up
+          const customField = document.getElementById("blast-custom-text");
+          const prev = customField?.value || "";
+          // Use the full generated tweet directly via clipboard + open platforms
+          navigator.clipboard?.writeText(generatedTweet);
+          ["twitter", "reddit", "facebook"].forEach((p, i) => {
+            const title    = document.getElementById("stream-title")?.value || "";
+            const encoded  = encodeURIComponent(generatedTweet);
+            const encodedUrl = encodeURIComponent(LIVE_URL);
+            const rTitle   = encodeURIComponent(`ricktaur is LIVE on Twitch!${title ? ` – ${title}` : ""}`);
+            const urls = {
+              twitter:  `https://twitter.com/intent/tweet?text=${encoded}`,
+              reddit:   `https://www.reddit.com/submit?url=${encodedUrl}&title=${rTitle}`,
+              facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+            };
+            setTimeout(() => window.open(urls[p], "_blank", "noopener,width=600,height=500"), i * 300);
+          });
+          showBlastFeedback("Promo tweet copied + all platforms opened!");
+        } else {
+          openPlatform("blast-all");
+        }
+      });
 
       // ── Init ──────────────────────────────────────────────────────────────
       buildShareLinks();
