@@ -5,7 +5,7 @@
   This file helps Google and other search engines discover all your pages.
 
   After deploying to Netlify:
-    1. Replace https://YOUR-SITE.netlify.app with your real URL.
+    1. Replace https://extensionadmoney.netlify.app with your real URL.
     2. Submit this sitemap in Google Search Console:
        https://search.google.com/search-console/sitemaps
 -->
@@ -13,42 +13,42 @@
 
   <!-- Shareable live page – highest priority, changes daily -->
   <url>
-    <loc>https://YOUR-SITE.netlify.app/live-now.html</loc>
+    <loc>https://extensionadmoney.netlify.app/live-now.html</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- Schedule page – good for recurring search traffic -->
   <url>
-    <loc>https://YOUR-SITE.netlify.app/schedule-embed.html</loc>
+    <loc>https://extensionadmoney.netlify.app/schedule-embed.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- Main stream embed -->
   <url>
-    <loc>https://YOUR-SITE.netlify.app/index.html</loc>
+    <loc>https://extensionadmoney.netlify.app/index.html</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Stream + Chat -->
   <url>
-    <loc>https://YOUR-SITE.netlify.app/stream-chat.html</loc>
+    <loc>https://extensionadmoney.netlify.app/stream-chat.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- VOD embed -->
   <url>
-    <loc>https://YOUR-SITE.netlify.app/vod-embed.html</loc>
+    <loc>https://extensionadmoney.netlify.app/vod-embed.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Chat embed -->
   <url>
-    <loc>https://YOUR-SITE.netlify.app/chat-embed.html</loc>
+    <loc>https://extensionadmoney.netlify.app/chat-embed.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

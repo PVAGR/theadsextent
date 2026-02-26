@@ -11,4 +11,4 @@ Disallow: /go-live.html
 
 # Point crawlers to the sitemap
 # UPDATE this URL to your actual deployed Netlify URL
-Sitemap: https://YOUR-SITE.netlify.app/sitemap.xml
+Sitemap: https://extensionadmoney.netlify.app/sitemap.xml
