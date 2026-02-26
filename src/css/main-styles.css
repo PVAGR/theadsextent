@@ -1,0 +1,480 @@
+/* =============================================================================
+   PVA Bazaar Stream Ecosystem - Main Styles
+   Version: 1.0.0 | Author: Ricktaur
+   Mobile-first, dark-mode default, WCAG 2.1 AA compliant
+   ============================================================================= */
+
+/* --- CSS Variables / Theming ------------------------------------------------ */
+:root {
+  --color-primary:    #9146FF; /* Twitch purple */
+  --color-secondary:  #ff6905;
+  --color-bg:         #0e0e10;
+  --color-surface:    #18181b;
+  --color-surface-2:  #26262c;
+  --color-border:     #3a3a4a;
+  --color-text:       #efeff1;
+  --color-text-muted: #adadb8;
+  --color-success:    #22c55e;
+  --color-danger:     #ef4444;
+  --color-warning:    #f59e0b;
+  --color-link:       #a78bfa;
+
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  16px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.6);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.8);
+
+  --transition: .2s ease;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Reset & Base ----------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+  transition: opacity var(--transition);
+}
+a:hover, a:focus { opacity: .8; text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+img { max-width: 100%; height: auto; display: block; }
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: .6rem 1.2rem;
+  transition: filter var(--transition), transform var(--transition);
+}
+button:hover  { filter: brightness(1.1); }
+button:active { transform: scale(.97); }
+button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* --- Layout ----------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* --- Header ----------------------------------------------------------------- */
+.site-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: .75rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.site-header__brand .dot { color: var(--color-primary); }
+
+/* --- Player Section --------------------------------------------------------- */
+.player-section { padding: 1rem 0 0; }
+
+/* --- Embed Container (16:9 aspect ratio) ------------------------------------ */
+.embed-wrapper {
+  position: relative;
+  width: 100%;
+  background: #000;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.embed-wrapper::before {
+  content: "";
+  display: block;
+  padding-bottom: 56.25%; /* 16:9 */
+}
+.embed-wrapper > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Twitch iframe */
+#twitch-player {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Loading spinner */
+.embed-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  gap: 1rem;
+}
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Offline placeholder */
+.embed-offline {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--color-surface);
+  text-align: center;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+.embed-offline.is-visible { display: flex; }
+
+.offline-icon { font-size: 3rem; }
+.offline-title { font-size: 1.4rem; font-weight: 700; }
+.offline-message { color: var(--color-text-muted); }
+
+.schedule-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: center;
+}
+.schedule-list li {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: .25rem .75rem;
+  font-size: .875rem;
+  color: var(--color-text-muted);
+}
+
+.offline-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  justify-content: center;
+}
+.btn { display: inline-flex; align-items: center; gap: .4rem; }
+.btn-primary  { background: var(--color-primary); color: #fff; }
+.btn-secondary { background: var(--color-surface-2); color: var(--color-text); border: 1px solid var(--color-border); }
+.btn-donate   { background: var(--color-success); color: #fff; }
+.btn-donate-b { background: var(--color-danger);  color: #fff; } /* A/B test variant */
+
+/* Error state */
+.embed-error {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--color-surface);
+  text-align: center;
+  gap: 1rem;
+}
+.embed-error.is-visible { display: flex; }
+.embed-error p { color: var(--color-text-muted); font-size: .9rem; max-width: 400px; }
+
+/* --- CTA Overlay ------------------------------------------------------------ */
+.cta-overlay {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 10;
+  pointer-events: auto;
+}
+.cta-overlay .btn {
+  font-size: .8rem;
+  padding: .4rem .8rem;
+  box-shadow: var(--shadow-md);
+  opacity: .92;
+}
+
+/* --- Chat Panel ------------------------------------------------------------- */
+.chat-panel {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  overflow: hidden;
+}
+.chat-panel iframe {
+  width: 100%;
+  height: 300px;
+  border: none;
+  display: block;
+}
+@media (max-width: 640px) {
+  .chat-panel { display: none; } /* Collapse chat on mobile to prioritise video */
+}
+
+/* --- Layout: Video + Chat side by side on desktop -------------------------- */
+@media (min-width: 960px) {
+  .stream-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1rem;
+    align-items: start;
+  }
+  .chat-panel {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+  }
+  .chat-panel iframe { height: 100%; min-height: 400px; }
+}
+
+/* --- Monetization Section --------------------------------------------------- */
+.monetization-section { padding: 1.5rem 0; }
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 1rem;
+}
+
+/* Affiliate Rotator */
+.affiliate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+.affiliate-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: box-shadow var(--transition), border-color var(--transition);
+  text-decoration: none;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+}
+.affiliate-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+  text-decoration: none;
+}
+.affiliate-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.affiliate-card__body { padding: .6rem; flex: 1; display: flex; flex-direction: column; gap: .25rem; }
+.affiliate-card__title { font-size: .875rem; font-weight: 600; }
+.affiliate-card__price { font-size: .8rem; color: var(--color-success); margin-top: auto; }
+
+.affiliate-disclosure {
+  font-size: .75rem;
+  color: var(--color-text-muted);
+  margin-top: .75rem;
+  font-style: italic;
+}
+
+/* Sponsor Bar */
+.sponsor-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: .75rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: 1.5rem;
+}
+.sponsor-bar__label {
+  font-size: .75rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  letter-spacing: .06em;
+  flex-shrink: 0;
+}
+.sponsor-logo {
+  display: inline-block;
+  opacity: .8;
+  transition: opacity var(--transition);
+}
+.sponsor-logo:hover { opacity: 1; }
+.sponsor-logo img { height: 36px; width: auto; }
+
+/* Donation Goal */
+.donation-goal {
+  margin-top: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+.goal-label { font-size: .9rem; font-weight: 600; margin-bottom: .5rem; }
+.goal-bar {
+  height: 10px;
+  background: var(--color-surface-2);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: .4rem;
+}
+.goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-radius: inherit;
+  transition: width .5s ease;
+}
+.goal-text { font-size: .8rem; color: var(--color-text-muted); }
+
+.tip-jar-trigger { margin-top: 1rem; }
+
+/* --- Donation Modal --------------------------------------------------------- */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-backdrop.is-open { display: flex; }
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+.modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.4rem;
+  padding: .2rem .5rem;
+}
+.modal__title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+.modal__options { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.modal__option {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: .4rem .9rem;
+  border-radius: var(--radius-sm);
+  font-size: .9rem;
+}
+.modal__option.is-selected,
+.modal__option:hover { border-color: var(--color-primary); background: rgba(145,70,255,.15); }
+.modal__actions { display: flex; flex-direction: column; gap: .75rem; }
+.modal__actions .btn { justify-content: center; width: 100%; }
+.btn-paypal { background: #ffc439; color: #000; }
+.btn-stripe  { background: #635bff; color: #fff; }
+
+/* --- Cookie Consent Banner -------------------------------------------------- */
+.cookie-banner {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: 1rem;
+  z-index: 300;
+  box-shadow: 0 -4px 16px rgba(0,0,0,.5);
+}
+.cookie-banner.is-visible { display: block; }
+.cookie-banner__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.cookie-banner__text { flex: 1; font-size: .875rem; color: var(--color-text-muted); }
+.cookie-banner__text a { color: var(--color-link); }
+.cookie-banner__actions { display: flex; gap: .5rem; flex-shrink: 0; }
+.btn-sm { font-size: .8rem; padding: .4rem .8rem; }
+
+/* --- Footer ----------------------------------------------------------------- */
+.site-footer {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: 1.5rem 0;
+  margin-top: 2rem;
+  text-align: center;
+  font-size: .8rem;
+  color: var(--color-text-muted);
+}
+.site-footer a { color: var(--color-text-muted); }
+.site-footer a:hover { color: var(--color-text); }
+.affiliate-footer-disclosure { margin-top: .5rem; font-style: italic; }
+
+/* --- Utilities -------------------------------------------------------------- */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.hidden { display: none !important; }
+
+/* --- Interstitial (pre-roll sponsor/affiliate) ------------------------------ */
+.interstitial {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface);
+  z-index: 20;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+.interstitial.is-visible { display: flex; }
+.interstitial__countdown { font-size: .85rem; color: var(--color-text-muted); }
+.interstitial__skip {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: .8rem;
+  padding: .3rem .7rem;
+}

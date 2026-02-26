@@ -1,0 +1,22 @@
+{
+  "name": "pva-bazaar-stream-ecosystem",
+  "version": "1.0.0",
+  "description": "PVA Bazaar Stream Ecosystem — automated streaming infrastructure and monetization engine",
+  "private": true,
+  "scripts": {
+    "lint": "eslint 'src/js/**/*.js' 'netlify/functions/**/*.js'",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "audit": "npm audit --audit-level=high"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [ "**/tests/**/*.test.js" ]
+  }
+}

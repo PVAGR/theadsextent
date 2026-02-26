@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Watch ricktaur live on Twitch — PVA Bazaar Stream" />
+
+  <!-- Content Security Policy: restrict sources to prevent XSS -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src  'self' 'nonce-REPLACE_WITH_SERVER_NONCE';
+    style-src   'self' 'unsafe-inline';
+    img-src     'self' https: data:;
+    frame-src   https://player.twitch.tv https://www.twitch.tv;
+    connect-src 'self' https://api.twitch.tv https://id.twitch.tv;
+    font-src    'self';
+    object-src  'none';
+    base-uri    'self';
+    form-action 'self';
+  " />
+
+  <!-- HTTPS enforcement (set via server headers in production) -->
+  <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains" />
+
+  <title>ricktaur — Live Stream | PVA Bazaar</title>
+  <link rel="stylesheet" href="/src/css/main-styles.css" />
+
+  <!-- Preconnect to Twitch for faster iframe load -->
+  <link rel="preconnect" href="https://player.twitch.tv" />
+  <link rel="preconnect" href="https://www.twitch.tv" />
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="site-header__brand" aria-label="PVA Bazaar Stream">
+        <span aria-hidden="true">📺</span>
+        <span>PVA Bazaar <span class="dot">•</span> ricktaur</span>
+      </div>
+      <a
+        href="https://www.twitch.tv/ricktaur"
+        class="btn btn-primary btn-sm"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Follow ricktaur on Twitch"
+      >Follow on Twitch</a>
+    </div>
+  </header>
+
+  <!-- ===== Player Section ===== -->
+  <main id="main-content" class="player-section">
+    <div class="container">
+
+      <!-- Stream layout: video left, chat right on desktop -->
+      <div class="stream-layout">
+
+        <!-- --- Embed Wrapper (16:9) --- -->
+        <div class="embed-wrapper" role="region" aria-label="Stream player">
+
+          <!-- Loading spinner (shown while API call is in-flight) -->
+          <div id="embed-loading" class="embed-loading" aria-live="polite" aria-label="Loading stream…">
+            <div class="spinner" role="status">
+              <span class="sr-only">Loading…</span>
+            </div>
+            <span class="sr-only">Checking stream status…</span>
+          </div>
+
+          <!-- Twitch Player iframe (injected by embed-engine.js when live) -->
+          <iframe
+            id="twitch-player"
+            class="hidden"
+            src=""
+            sandbox="allow-scripts allow-same-origin allow-popups"
+            allowfullscreen
+            title="ricktaur live stream on Twitch"
+            aria-label="Twitch live stream player"
+          ></iframe>
+
+          <!-- Interstitial (pre-roll sponsor, shown before offline placeholder) -->
+          <div id="embed-interstitial" class="interstitial" role="region" aria-label="Sponsor message">
+            <p class="interstitial__countdown" aria-live="polite">Continuing in 5s…</p>
+            <p>
+              <strong>Powered by PVA Bazaar</strong><br />
+              <small>Your partner in product sourcing &amp; reselling</small>
+            </p>
+            <a
+              href="https://pvabazaar.com"
+              class="btn btn-primary"
+              target="_blank"
+              rel="sponsored noopener noreferrer"
+              aria-label="Visit PVA Bazaar website"
+            >Visit PVA Bazaar</a>
+            <button class="interstitial__skip btn" aria-label="Skip sponsor message">Skip →</button>
+          </div>
+
+          <!-- Offline Placeholder (shown when channel is not live) -->
+          <div id="embed-offline" class="embed-offline" role="region" aria-label="Stream is offline">
+            <span class="offline-icon" aria-hidden="true">🌙</span>
+            <h2 class="offline-title">Stream is currently offline</h2>
+            <p id="offline-message" class="offline-message">Catch the next stream at 8 PM EST!</p>
+
+            <section aria-labelledby="schedule-heading">
+              <h3 id="schedule-heading" class="section-title">Upcoming Schedule</h3>
+              <ul id="schedule-list" class="schedule-list" aria-label="Stream schedule">
+                <!-- Populated by embed-engine.js -->
+              </ul>
+            </section>
+
+            <div id="vod-links" class="offline-links" aria-label="VOD and highlight links">
+              <!-- Populated by embed-engine.js -->
+            </div>
+
+            <a
+              id="notify-me-btn"
+              href="https://www.twitch.tv/ricktaur"
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow ricktaur on Twitch to get notified"
+            >🔔 Notify Me When Live</a>
+
+            <button
+              class="btn btn-donate"
+              data-open-modal="tip-jar"
+              aria-haspopup="dialog"
+              aria-label="Support the stream"
+              style="--btn-bg: #22c55e;"
+            >💜 Support the Stream</button>
+          </div>
+
+          <!-- Error state -->
+          <div id="embed-error" class="embed-error" role="alert">
+            <span aria-hidden="true">⚠️</span>
+            <h2>Could not load the stream</h2>
+            <p id="embed-error-message">
+              If you are embedding this on your own site, ensure the domain is
+              registered in the Twitch Developer Console as an allowed parent domain.
+            </p>
+            <a
+              href="https://www.twitch.tv/ricktaur"
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Watch on Twitch.tv</a>
+          </div>
+
+          <!-- CTA Overlay (persistent corner button while stream is live) -->
+          <div id="cta-overlay" class="cta-overlay hidden" aria-label="Stream call-to-action">
+            <button
+              class="btn btn-donate"
+              data-open-modal="tip-jar"
+              aria-haspopup="dialog"
+              aria-label="Support the stream"
+            >💜 Support Stream</button>
+          </div>
+
+        </div><!-- /.embed-wrapper -->
+
+        <!-- --- Chat Panel --- -->
+        <aside id="chat-panel" class="chat-panel hidden" aria-label="Twitch live chat">
+          <iframe
+            src=""
+            title="ricktaur Twitch chat"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+            aria-label="Twitch live chat window"
+          ></iframe>
+        </aside>
+
+      </div><!-- /.stream-layout -->
+
+    </div><!-- /.container -->
+  </main>
+
+  <!-- ===== Monetization Section ===== -->
+  <section class="monetization-section" aria-labelledby="affiliate-heading">
+    <div class="container">
+
+      <!-- Affiliate Product Rotator -->
+      <h2 id="affiliate-heading" class="section-title">Shop My Gear</h2>
+      <div id="affiliate-grid" class="affiliate-grid" aria-label="Affiliate product showcase">
+        <!-- Populated by monetization.js -->
+      </div>
+      <p class="affiliate-disclosure">
+        As an Amazon Associate and affiliate partner, I earn from qualifying purchases.
+        <a href="/privacy-policy.html">Privacy Policy</a>
+      </p>
+
+      <!-- Donation Goal Progress -->
+      <div id="donation-goal" class="donation-goal" aria-labelledby="goal-label">
+        <p id="goal-label" class="goal-label">Loading goal…</p>
+        <div class="goal-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="goal-fill" class="goal-fill" style="width:0%"></div>
+        </div>
+        <p id="goal-text" class="goal-text"></p>
+      </div>
+
+      <div class="tip-jar-trigger">
+        <button
+          class="btn btn-donate"
+          data-open-modal="tip-jar"
+          aria-haspopup="dialog"
+          aria-label="Open tip jar"
+        >🍯 Tip Jar</button>
+      </div>
+
+      <!-- Sponsor Bar -->
+      <div id="sponsor-bar" class="sponsor-bar" aria-label="Current sponsors">
+        <span class="sponsor-bar__label">Sponsors</span>
+        <div class="sponsor-logos">
+          <!-- Populated by monetization.js -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== Tip Jar Modal ===== -->
+  <div
+    id="tip-jar-modal"
+    class="modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+  >
+    <div class="modal">
+      <button class="modal__close" aria-label="Close tip jar">✕</button>
+      <h2 id="modal-title" class="modal__title">💜 Support the Stream</h2>
+      <p>Every contribution keeps the stream going. Thank you!</p>
+
+      <div class="modal__options" role="group" aria-label="Select donation amount">
+        <button class="modal__option" aria-label="Donate $5">$5</button>
+        <button class="modal__option is-selected" aria-label="Donate $10">$10</button>
+        <button class="modal__option" aria-label="Donate $20">$20</button>
+        <button class="modal__option" aria-label="Donate $50">$50</button>
+      </div>
+
+      <div class="modal__actions">
+        <button id="paypal-donate-btn" class="btn btn-paypal" aria-label="Donate via PayPal">
+          Donate via PayPal
+        </button>
+        <button id="stripe-donate-btn" class="btn btn-stripe" aria-label="Donate via Stripe">
+          Donate via Stripe
+        </button>
+      </div>
+
+      <p style="font-size:.75rem;color:var(--color-text-muted);margin-top:.75rem;">
+        All donations are voluntary. Donors may remain anonymous.
+        <a href="/privacy-policy.html">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== Cookie Consent Banner ===== -->
+  <div
+    id="cookie-banner"
+    class="cookie-banner"
+    role="region"
+    aria-label="Cookie consent"
+    aria-live="polite"
+  >
+    <div class="cookie-banner__inner">
+      <p class="cookie-banner__text">
+        We use anonymised analytics to improve this site and support ongoing research.
+        No personal data is collected. See our
+        <a href="/privacy-policy.html">Privacy Policy</a> for details.
+      </p>
+      <div class="cookie-banner__actions">
+        <button id="cookie-accept" class="btn btn-primary btn-sm" aria-label="Accept analytics">
+          Accept
+        </button>
+        <button id="cookie-deny" class="btn btn-secondary btn-sm" aria-label="Decline analytics">
+          Decline
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>
+        &copy; <span id="footer-year"></span> PVA Bazaar / ricktaur &mdash;
+        <a href="/privacy-policy.html">Privacy Policy</a> &bull;
+        <a href="https://www.twitch.tv/ricktaur" target="_blank" rel="noopener noreferrer">Twitch</a>
+      </p>
+      <p class="affiliate-footer-disclosure">
+        Affiliate links are clearly marked. We may earn a commission on qualifying purchases.
+        <a href="/privacy-policy.html#affiliate">Affiliate Disclosure</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- ===== Application Bootstrap ===== -->
+  <script type="module" src="/src/js/main.js"></script>
+  <script>
+    // Set current year in footer (inline for reliability)
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>

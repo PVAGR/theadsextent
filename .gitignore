@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets — NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs
+*.log
+error.log
+
+# Netlify build output
+.netlify/
+
+# Test coverage
+coverage/
