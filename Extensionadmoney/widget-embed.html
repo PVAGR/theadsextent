@@ -183,9 +183,23 @@
           default:        renderBadge(root, channel, live, liveUrl); break;
         }
 
-        // Auto-refresh every 90 seconds
-        const intervalMs = 90_000;
-        setInterval(async () => {
+        // ── Auto-refresh ──────────────────────────────────────────────────
+        // Poll the ping endpoint every 10 s — when a GO LIVE ping is detected
+        // the widget re-checks live status immediately.
+        // Also do a full live-status refresh every 90 s regardless.
+        let lastPingedAt = null;
+        const PING_ENDPOINT = "/.netlify/functions/ping";
+
+        async function getLatestPing() {
+          try {
+            const r = await fetch(PING_ENDPOINT, { cache: "no-store" });
+            if (!r.ok) return null;
+            const d = await r.json();
+            return d.pingedAt || null;
+          } catch { return null; }
+        }
+
+        async function refreshWidget() {
           let newLive = false;
           if (config?.twitch) newLive = await checkLive(config.twitch);
           if (newLive !== live) {
@@ -197,7 +211,19 @@
               default:        renderBadge(root, channel, live, liveUrl); break;
             }
           }
-        }, intervalMs);
+        }
+
+        // Fast ping-check every 10 s — instant update when GO LIVE is pressed
+        setInterval(async () => {
+          const pingedAt = await getLatestPing();
+          if (pingedAt && pingedAt !== lastPingedAt) {
+            lastPingedAt = pingedAt;
+            await refreshWidget();
+          }
+        }, 10_000);
+
+        // Full refresh every 90 s regardless
+        setInterval(refreshWidget, 90_000);
       }
 
       if (document.readyState === "loading") {

@@ -165,6 +165,52 @@
         <div id="blast-feedback" class="hidden text-xs text-green-400 text-center py-1"></div>
       </section>
 
+      <!-- Embed Everywhere -->
+      <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="text-base">📡</span>
+          <h2 class="text-sm font-semibold text-gray-200">Embed Everywhere</h2>
+        </div>
+        <p class="text-xs text-gray-400">
+          Paste any snippet onto other websites, blogs, or forums once — they automatically show your stream the moment you press GO LIVE.
+        </p>
+        <div class="space-y-3">
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/40 p-3 space-y-1.5">
+            <p class="text-[11px] font-semibold text-twitch">Live Badge (tiny pill — goes anywhere)</p>
+            <p class="text-[10px] text-gray-500">Shows LIVE when streaming, offline when not. Updates within 10 seconds of GO LIVE.</p>
+            <div class="relative">
+              <pre id="embed-badge" class="text-[10px] text-gray-300 bg-black rounded-lg p-2 overflow-x-auto whitespace-pre-wrap break-all">&lt;iframe src="https://extensionadmoney.netlify.app/widget" width="160" height="40" frameborder="0" scrolling="no" style="border:none;"&gt;&lt;/iframe&gt;</pre>
+              <button type="button" onclick="copyEmbed('embed-badge')" class="absolute top-1.5 right-1.5 text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+          </div>
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/40 p-3 space-y-1.5">
+            <p class="text-[11px] font-semibold text-twitch">Card Widget (avatar + Watch Now button)</p>
+            <p class="text-[10px] text-gray-500">Good for sidebars, blog posts, forum signatures.</p>
+            <div class="relative">
+              <pre id="embed-card" class="text-[10px] text-gray-300 bg-black rounded-lg p-2 overflow-x-auto whitespace-pre-wrap break-all">&lt;iframe src="https://extensionadmoney.netlify.app/widget/card" width="240" height="155" frameborder="0" scrolling="no" style="border:none;"&gt;&lt;/iframe&gt;</pre>
+              <button type="button" onclick="copyEmbed('embed-card')" class="absolute top-1.5 right-1.5 text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+          </div>
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/40 p-3 space-y-1.5">
+            <p class="text-[11px] font-semibold text-twitch">Full-Width Live Banner (invisible when offline)</p>
+            <p class="text-[10px] text-gray-500">Drop at the top of any page — animates in when you go live.</p>
+            <div class="relative">
+              <pre id="embed-banner" class="text-[10px] text-gray-300 bg-black rounded-lg p-2 overflow-x-auto whitespace-pre-wrap break-all">&lt;iframe src="https://extensionadmoney.netlify.app/widget/banner" width="100%" height="38" frameborder="0" scrolling="no" style="border:none;width:100%;"&gt;&lt;/iframe&gt;</pre>
+              <button type="button" onclick="copyEmbed('embed-banner')" class="absolute top-1.5 right-1.5 text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+          </div>
+          <div class="rounded-xl border border-neutral-800 bg-neutral-900/40 p-3 space-y-1.5">
+            <p class="text-[11px] font-semibold text-twitch">Full Stream Player (entire stream on any site)</p>
+            <p class="text-[10px] text-gray-500">Embeds the full stream, chat, affiliate links, and donation goal on another website.</p>
+            <div class="relative">
+              <pre id="embed-player" class="text-[10px] text-gray-300 bg-black rounded-lg p-2 overflow-x-auto whitespace-pre-wrap break-all">&lt;iframe src="https://extensionadmoney.netlify.app/live" width="100%" height="600" frameborder="0" scrolling="no" allowfullscreen allow="autoplay; fullscreen" style="border:none;width:100%;"&gt;&lt;/iframe&gt;</pre>
+              <button type="button" onclick="copyEmbed('embed-player')" class="absolute top-1.5 right-1.5 text-[10px] rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-gray-300 px-2 py-0.5">Copy</button>
+            </div>
+          </div>
+        </div>
+        <p class="text-[10px] text-gray-500">Give these to anyone running a website, WordPress blog, or forum — they paste it once and your stream shows up automatically every time you go live.</p>
+      </section>
+
       <!-- Quick links -->
       <section class="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 space-y-3">
         <h2 class="text-sm font-semibold text-gray-200">Share These Links</h2>
@@ -501,6 +547,15 @@
             <p class="text-gray-500">Update <code class="text-twitch">goalCurrent</code> in config.json after each stream to track real progress.</p>`;
         } catch { /* ignore */ }
       }
+
+      // ── Embed copy helper ─────────────────────────────────────────────────
+      window.copyEmbed = function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        navigator.clipboard?.writeText(el.textContent.trim());
+        const btn = el.nextElementSibling;
+        if (btn) { const orig = btn.textContent; btn.textContent = "Copied!"; setTimeout(() => btn.textContent = orig, 1500); }
+      };
 
       // ── Init ──────────────────────────────────────────────────────────────
       buildShareLinks();

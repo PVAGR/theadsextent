@@ -111,7 +111,18 @@ exports.handler = async function (event) {
     results.push({ destination: "discord", status: "skipped", reason: "DISCORD_WEBHOOK_URL not set" });
   }
 
-  // ── Extensibility placeholder: add Slack, email, etc. here ───────────────
+  // ── Ping all embedded widgets to refresh instantly ───────────────────────
+  try {
+    const pingUrl = `${siteUrl}/.netlify/functions/ping`;
+    await fetch(pingUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret: body.secret }),
+    });
+    results.push({ destination: "widget-ping", status: "sent" });
+  } catch (err) {
+    results.push({ destination: "widget-ping", status: "error", message: err.message });
+  }
 
   return {
     statusCode: 200,
