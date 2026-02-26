@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "embed": {
+    "channel": "ricktaur",
+    "autoplay": true,
+    "muted": true,
+    "chat_enabled": true,
+    "theme_color": "#9146FF",
+    "offline_message": "Catch the next stream at 8 PM EST!",
+    "schedule": [
+      { "day": "Tuesday",   "time": "8:00 PM EST" },
+      { "day": "Thursday",  "time": "8:00 PM EST" },
+      { "day": "Saturday",  "time": "3:00 PM EST" }
+    ],
+    "vod_url":    "https://www.twitch.tv/ricktaur/videos",
+    "youtube_url": "https://www.youtube.com/@ricktaur",
+    "follow_url":  "https://www.twitch.tv/ricktaur"
+  },
+  "api": {
+    "twitch_client_id": "YOUR_TWITCH_CLIENT_ID_HERE",
+    "twitch_api_base":  "https://api.twitch.tv/helix"
+  },
+  "monetization": {
+    "donation": {
+      "enabled": true,
+      "paypal_button_id": "YOUR_PAYPAL_BUTTON_ID_HERE",
+      "stripe_payment_link": "YOUR_STRIPE_PAYMENT_LINK_HERE",
+      "goal_label":   "New Camera Fund",
+      "goal_current": 250,
+      "goal_target":  1000,
+      "goal_currency": "USD"
+    },
+    "affiliate_disclosure": "As an Amazon Associate I earn from qualifying purchases. Some links on this page are affiliate links.",
+    "affiliates": [
+      {
+        "id":    "product-001",
+        "title": "Blue Yeti USB Microphone",
+        "image": "https://via.placeholder.com/200x150?text=Microphone",
+        "link":  "https://amzn.to/example1",
+        "price": "$99.99"
+      },
+      {
+        "id":    "product-002",
+        "title": "Elgato Key Light",
+        "image": "https://via.placeholder.com/200x150?text=Key+Light",
+        "link":  "https://amzn.to/example2",
+        "price": "$149.99"
+      },
+      {
+        "id":    "product-003",
+        "title": "Logitech C920 Webcam",
+        "image": "https://via.placeholder.com/200x150?text=Webcam",
+        "link":  "https://amzn.to/example3",
+        "price": "$69.99"
+      },
+      {
+        "id":    "product-004",
+        "title": "PVA Bazaar Sourcing Guide",
+        "image": "https://via.placeholder.com/200x150?text=Guide",
+        "link":  "https://pvabazaar.com/guide",
+        "price": "$29.99"
+      }
+    ],
+    "sponsors": [
+      {
+        "id":       "sponsor-001",
+        "name":     "PVA Bazaar",
+        "logo":     "https://via.placeholder.com/120x40?text=PVA+Bazaar",
+        "url":      "https://pvabazaar.com",
+        "alt":      "PVA Bazaar - Your sourcing partner",
+        "expires":  "2026-12-31"
+      }
+    ],
+    "store_url": "https://pvabazaar.com/store"
+  },
+  "analytics": {
+    "enabled":       true,
+    "endpoint":      "/api/log",
+    "retention_days": 365,
+    "ab_test_group": "A"
+  },
+  "chat_filter": {
+    "blocked_keywords": []
+  }
+}

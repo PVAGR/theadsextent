@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Watch ricktaur live on Twitch – gaming, community, and more." />
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' 'unsafe-inline' https://embed.twitch.tv https://player.twitch.tv;
+                 frame-src https://embed.twitch.tv https://player.twitch.tv;
+                 img-src 'self' https: data:;
+                 connect-src 'self' https://api.twitch.tv;
+                 style-src 'self' 'unsafe-inline';
+                 font-src 'self' data:;" />
+
+  <title>ricktaur – Live Stream Embed</title>
+  <link rel="stylesheet" href="src/styles/main-styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       COOKIE CONSENT BANNER  (GDPR / CCPA)
+       ============================================================ -->
+  <div id="cookie-banner" class="cookie-banner" role="alertdialog" aria-label="Cookie consent">
+    <p>
+      This page uses analytics to improve the experience and support academic research.
+      No personally identifiable information is collected.
+      <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>
+    </p>
+    <div class="cookie-banner__actions">
+      <button id="cookie-accept" class="btn btn--primary" aria-label="Accept analytics">Accept</button>
+      <button id="cookie-decline" class="btn btn--secondary" aria-label="Decline analytics">Decline</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MAIN EMBED CONTAINER
+       ============================================================ -->
+  <main id="stream-container" class="stream-container">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner" aria-label="Loading stream" role="status">
+      <div class="spinner"></div>
+      <p>Loading stream…</p>
+    </div>
+
+    <!-- Live Player (injected by embed-engine.js when live) -->
+    <div id="player-wrapper" class="player-wrapper" hidden>
+      <!-- Twitch iframe injected here by JavaScript -->
+
+      <!-- Overlay: Call-to-Action -->
+      <div class="overlay" aria-hidden="true">
+        <button id="btn-support"
+                class="btn btn--cta"
+                aria-label="Support the stream"
+                onclick="window.StreamDonation && window.StreamDonation.openModal()">
+          💜 Support the Stream
+        </button>
+      </div>
+    </div>
+
+    <!-- Offline Placeholder -->
+    <div id="offline-placeholder" class="offline-placeholder" hidden>
+      <div class="offline-placeholder__content">
+        <h1 class="offline-placeholder__heading">📺 Stream is Offline</h1>
+        <p class="offline-placeholder__message" id="offline-message"></p>
+
+        <!-- Schedule -->
+        <section class="schedule" aria-label="Stream schedule">
+          <h2 class="schedule__heading">Upcoming Streams</h2>
+          <ul id="schedule-list" class="schedule__list"></ul>
+        </section>
+
+        <!-- Action Buttons -->
+        <div class="offline-actions">
+          <a id="btn-follow"  class="btn btn--primary" href="#" target="_blank" rel="noopener" aria-label="Follow on Twitch">
+            🔔 Notify Me on Twitch
+          </a>
+          <a id="btn-vods"    class="btn btn--secondary" href="#" target="_blank" rel="noopener" aria-label="Watch past VODs">
+            ▶ Watch VODs
+          </a>
+          <a id="btn-youtube" class="btn btn--secondary" href="#" target="_blank" rel="noopener" aria-label="Watch YouTube highlights">
+            📹 YouTube Highlights
+          </a>
+          <a id="btn-store"   class="btn btn--accent" href="#" target="_blank" rel="noopener" aria-label="Visit digital store">
+            🛒 Digital Store
+          </a>
+        </div>
+
+        <!-- Pre-Roll Interstitial (sponsor/affiliate) -->
+        <div id="interstitial" class="interstitial" hidden>
+          <p class="interstitial__label">Featured Partner</p>
+          <div id="interstitial-content"></div>
+          <div id="interstitial-timer" class="interstitial__timer" aria-live="polite"></div>
+        </div>
+
+        <!-- Affiliate Rotator -->
+        <section class="affiliate-section" aria-label="Recommended products">
+          <h2 class="affiliate-section__heading">Gear We Recommend</h2>
+          <p class="affiliate-disclosure" id="affiliate-disclosure"></p>
+          <div id="affiliate-rotator" class="affiliate-rotator"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- API Error State -->
+    <div id="api-error" class="api-error" hidden>
+      <p>⚠️ Could not reach the stream status API. Showing last known state.</p>
+    </div>
+
+  </main>
+
+  <!-- ============================================================
+       DONATION MODAL
+       ============================================================ -->
+  <div id="donation-modal" class="modal" role="dialog" aria-modal="true" aria-label="Support the stream" hidden>
+    <div class="modal__backdrop" id="modal-backdrop"></div>
+    <div class="modal__box">
+      <button class="modal__close" id="btn-close-modal" aria-label="Close donation modal">✕</button>
+      <h2 class="modal__title">💜 Support the Stream</h2>
+
+      <!-- Goal Progress Bar -->
+      <div class="donation-goal" id="donation-goal" hidden>
+        <p class="donation-goal__label" id="donation-goal-label"></p>
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="progress-bar">
+          <div class="progress-bar__fill" id="progress-fill"></div>
+        </div>
+        <p class="donation-goal__amounts" id="donation-goal-amounts"></p>
+      </div>
+
+      <p class="modal__body">Every contribution helps keep the stream running. Choose your method below:</p>
+
+      <div class="donation-buttons" id="donation-buttons">
+        <!-- Buttons injected by donation.js -->
+      </div>
+
+      <p class="modal__privacy-note">
+        Donations may be processed anonymously. No personal data is stored by this site.
+        <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="site-footer">
+    <!-- Sponsor Logos -->
+    <div id="sponsor-carousel" class="sponsor-carousel" aria-label="Our sponsors"></div>
+
+    <p class="site-footer__legal">
+      Stream embed provided under the
+      <a href="https://www.twitch.tv/p/en/legal/developer-agreement/" target="_blank" rel="noopener noreferrer">Twitch Developer Agreement</a>.
+      <span id="footer-affiliate-disclosure"></span>
+      <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a> ·
+      <a href="terms.html"          target="_blank" rel="noopener">Terms of Use</a>
+    </p>
+  </footer>
+
+  <!-- ============================================================
+       SCRIPTS  (defer for performance)
+       ============================================================ -->
+  <script src="src/components/analytics/logger.js"            defer></script>
+  <script src="src/components/monetization/affiliate-rotator.js" defer></script>
+  <script src="src/components/monetization/donation.js"       defer></script>
+  <script src="src/components/embed/embed-engine.js"          defer></script>
+
+</body>
+</html>
