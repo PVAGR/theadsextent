@@ -36,7 +36,7 @@
     X-Frame-Options = "ALLOWALL"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "autoplay=(self), fullscreen=(self)"
+    Permissions-Policy = "autoplay=*, fullscreen=*"
 
 # Allow CORS on the Netlify functions so the embeds can call them from
 # any origin (embed pages may be served from different domains).

@@ -317,7 +317,7 @@
           iframe.src = buildPlayerUrl(channel, embed);
           iframe.setAttribute("frameborder", "0");
           iframe.setAttribute("allowfullscreen", "true");
-          iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
+          iframe.setAttribute("allow", "autoplay; fullscreen");
           iframe.className = "absolute inset-0 w-full h-full";
           iframe.title = `Twitch live – ${channel}`;
           shell.replaceChildren(iframe);

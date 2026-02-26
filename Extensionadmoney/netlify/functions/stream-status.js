@@ -11,9 +11,13 @@
 const TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const TWITCH_STREAMS_URL = "https://api.twitch.tv/helix/streams";
 
+// In-memory token cache (per warm Netlify instance – avoids repeated token fetches
+// from widget poll cycles hitting Twitch rate limits)
+let _tokenCache = null; // { token: string, expiresAt: number }
+
 /**
  * Fetch an app access token using the Client Credentials flow.
- * Token is not cached here; Netlify's short-lived instances will naturally limit reuse.
+ * Caches the token in memory for ~55 minutes to avoid rate limits.
  *
  * @returns {Promise<string>}
  */
@@ -22,7 +26,12 @@ async function getAppAccessToken() {
   const clientSecret = process.env.TWITCH_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error("Missing TWITCH_CLIENT_ID or TWITCH_CLIENT_SECRET environment variables.");
+    throw new Error("TWITCH_CREDENTIALS_MISSING");
+  }
+
+  // Return cached token if still valid
+  if (_tokenCache && Date.now() < _tokenCache.expiresAt) {
+    return _tokenCache.token;
   }
 
   const params = new URLSearchParams({
@@ -48,7 +57,9 @@ async function getAppAccessToken() {
     throw new Error("Twitch token response missing access_token.");
   }
 
-  return data.access_token;
+  // Cache for 55 minutes (tokens live 60 min; 5-min buffer for safety)
+  _tokenCache = { token: data.access_token, expiresAt: Date.now() + 55 * 60 * 1000 };
+  return _tokenCache.token;
 }
 
 /**
@@ -59,10 +70,6 @@ async function getAppAccessToken() {
  */
 async function isChannelLive(channelLogin) {
   const clientId = process.env.TWITCH_CLIENT_ID;
-  if (!clientId) {
-    throw new Error("Missing TWITCH_CLIENT_ID environment variable.");
-  }
-
   const accessToken = await getAppAccessToken();
 
   const url = new URL(TWITCH_STREAMS_URL);
@@ -126,21 +133,27 @@ exports.handler = async function handler(event) {
       statusCode: 200,
       headers: {
         ...corsHeaders,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store"
       },
       body: JSON.stringify(payload)
     };
   } catch (error) {
-    console.error("stream-status error:", error);
+    console.error("stream-status error:", error.message);
+
+    // Credentials not configured – return offline gracefully so embeds don't break
+    if (error.message === "TWITCH_CREDENTIALS_MISSING") {
+      return {
+        statusCode: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" },
+        body: JSON.stringify({ live: false, channel, unconfigured: true, lastCheckedAt: new Date().toISOString() })
+      };
+    }
+
     return {
       statusCode: 502,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        error: "Failed to resolve Twitch status."
-      })
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Failed to resolve Twitch status." })
     };
   }
 };
