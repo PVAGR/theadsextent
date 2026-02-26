@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PVA Bazaar – Setup & Connect</title>
+    <meta name="description" content="One-time setup wizard to connect all PVA Bazaar pages to your Twitch channel." />
+    <meta name="robots" content="noindex" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: { extend: { colors: { twitch: "#9146FF" } } },
+      };
+    </script>
+    <style>
+      :root { color-scheme: dark; }
+      .spin { animation: spin 0.8s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .pulse-once { animation: pulse-once 0.4s ease; }
+      @keyframes pulse-once { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    </style>
+  </head>
+
+  <body class="bg-black text-gray-100 min-h-screen flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-lg space-y-6">
+
+      <!-- Header -->
+      <div class="text-center space-y-1">
+        <div class="inline-flex items-center gap-2 text-twitch font-bold text-2xl">
+          <span class="w-3 h-3 rounded-full bg-twitch inline-block"></span>
+          PVA Bazaar
+        </div>
+        <h1 class="text-xl font-bold text-gray-50">Connect Everything</h1>
+        <p class="text-sm text-gray-400">Enter your Twitch credentials once. Every page and widget will instantly know when you're live.</p>
+      </div>
+
+      <!-- Status card (shown after page loads) -->
+      <div id="status-card" class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4 hidden">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xs font-semibold text-gray-300 uppercase tracking-wide">Current Status</span>
+        </div>
+        <div id="status-rows" class="space-y-2 text-sm"></div>
+      </div>
+
+      <!-- Form card -->
+      <div class="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-gray-200">Twitch Credentials
+          <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer"
+             class="ml-2 text-[11px] text-twitch hover:underline font-normal">Get them free at dev.twitch.tv ↗</a>
+        </h2>
+
+        <!-- Step guide -->
+        <details class="text-xs text-gray-400 rounded-lg border border-neutral-800 bg-neutral-950/60">
+          <summary class="px-3 py-2 cursor-pointer hover:text-gray-200 font-medium select-none">
+            How to get your Client ID & Secret (3 steps) ▸
+          </summary>
+          <ol class="px-4 pb-3 pt-1 space-y-1.5 list-decimal list-inside">
+            <li>Go to <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer" class="text-twitch underline">dev.twitch.tv/console/apps</a> and sign in with your Twitch account.</li>
+            <li>Click <strong class="text-gray-200">Register Your Application</strong>. Name it anything (e.g. "PVA Bazaar"). Set OAuth Redirect URL to <code class="bg-neutral-800 px-1 rounded">https://localhost</code>. Category: <strong class="text-gray-200">Website Integration</strong>.</li>
+            <li>After saving, click <strong class="text-gray-200">Manage</strong> → copy the <strong class="text-gray-200">Client ID</strong>. Click <strong class="text-gray-200">New Secret</strong> → copy the <strong class="text-gray-200">Client Secret</strong>. Paste both below.</li>
+          </ol>
+        </details>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Twitch Client ID <span class="text-red-400">*</span></label>
+            <input id="f-client-id" type="text" autocomplete="off" spellcheck="false"
+                   placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                   class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Twitch Client Secret <span class="text-red-400">*</span></label>
+            <div class="relative">
+              <input id="f-client-secret" type="password" autocomplete="off" spellcheck="false"
+                     placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                     class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 pr-16 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+              <button id="toggle-secret" type="button"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 hover:text-gray-200">Show</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Twitch Channel <span class="text-red-400">*</span></label>
+            <input id="f-channel" type="text" autocomplete="off" spellcheck="false"
+                   value="ricktaur"
+                   class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+          </div>
+        </div>
+
+        <hr class="border-neutral-800" />
+
+        <details>
+          <summary class="text-xs font-medium text-gray-400 cursor-pointer hover:text-gray-200 select-none">
+            Optional: Notifications &amp; Discord ▸
+          </summary>
+          <div class="mt-3 space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-300 mb-1">Notify Secret
+                <span class="text-gray-500 font-normal">– protects your Go-Live button endpoint</span>
+              </label>
+              <input id="f-notify-secret" type="text" autocomplete="off" spellcheck="false"
+                     placeholder="any random string (e.g. my-secret-123)"
+                     class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-300 mb-1">Discord Webhook URL
+                <span class="text-gray-500 font-normal">– get from Discord Server Settings → Integrations</span>
+              </label>
+              <input id="f-discord" type="url" autocomplete="off" spellcheck="false"
+                     placeholder="https://discord.com/api/webhooks/..."
+                     class="w-full rounded-lg bg-neutral-900 border border-neutral-700 text-gray-100 text-sm px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-twitch" />
+            </div>
+          </div>
+        </details>
+
+        <!-- Error message -->
+        <div id="form-error" class="hidden rounded-lg bg-red-950/60 border border-red-800/60 px-3 py-2 text-sm text-red-300"></div>
+
+        <!-- Submit -->
+        <button id="connect-btn" type="button"
+                class="w-full rounded-full bg-twitch hover:bg-twitch/90 text-white font-bold text-sm py-2.5 shadow shadow-twitch/30 transition flex items-center justify-center gap-2">
+          <span id="connect-btn-text">Connect Everything</span>
+          <span id="connect-btn-spinner" class="hidden w-4 h-4 border-2 border-t-transparent border-white rounded-full spin"></span>
+        </button>
+      </div>
+
+      <!-- Success card (shown after connect) -->
+      <div id="success-card" class="hidden rounded-2xl border border-green-800/50 bg-green-950/30 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="text-green-400 text-lg">✅</span>
+          <h2 class="font-bold text-gray-50">Connected!</h2>
+        </div>
+        <div id="success-rows" class="space-y-2 text-sm"></div>
+        <hr class="border-neutral-800" />
+        <p class="text-xs text-gray-400">All your pages now detect live status from Twitch in real time. Use the links below to verify:</p>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <a href="/live-now.html" target="_blank" rel="noopener noreferrer"
+             class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Live Now page ↗</a>
+          <a href="/stream-chat.html" target="_blank" rel="noopener noreferrer"
+             class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Stream + Chat ↗</a>
+          <a href="/widget-embed.html" target="_blank" rel="noopener noreferrer"
+             class="rounded-full border border-neutral-700 text-gray-300 px-3 py-1.5 hover:bg-neutral-800 transition">Widget ↗</a>
+          <a href="/go-live.html" target="_blank" rel="noopener noreferrer"
+             class="rounded-full bg-twitch/90 hover:bg-twitch text-white px-3 py-1.5 font-semibold transition">Go-Live Panel ↗</a>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <p class="text-center text-[11px] text-gray-600">
+        Credentials are stored securely in Netlify Blobs (your site's private storage). They are never sent anywhere except Twitch's own API for validation.
+      </p>
+    </div>
+
+    <script type="module">
+      const API = "/.netlify/functions/setup";
+
+      function statusRow(label, ok, detail = "") {
+        const color = ok === true ? "text-green-400" : ok === false ? "text-red-400" : "text-gray-400";
+        const icon  = ok === true ? "✅" : ok === false ? "❌" : "⬜";
+        return `<div class="flex items-center gap-2">
+          <span>${icon}</span>
+          <span class="font-medium text-gray-200">${label}</span>
+          ${detail ? `<span class="${color} text-xs">${detail}</span>` : ""}
+        </div>`;
+      }
+
+      async function loadStatus() {
+        try {
+          const r = await fetch(API, { cache: "no-store" });
+          const d = await r.json();
+          const card = document.getElementById("status-card");
+          const rows = document.getElementById("status-rows");
+          card.classList.remove("hidden");
+
+          if (!d.configured) {
+            rows.innerHTML = statusRow("Twitch credentials", false, "Not configured yet");
+            return;
+          }
+
+          rows.innerHTML = [
+            statusRow("Twitch Client ID",     d.hasClientId,      d.hasClientId ? "saved" : "missing"),
+            statusRow("Twitch Client Secret", d.hasClientSecret,  d.hasClientSecret ? "saved" : "missing"),
+            statusRow("Channel",              true,               d.channel || "—"),
+            statusRow("Notify Secret",        d.hasNotifySecret,  d.hasNotifySecret ? "saved" : "optional, not set"),
+            statusRow("Discord Webhook",      d.hasDiscordWebhook,d.hasDiscordWebhook ? "saved" : "optional, not set"),
+            `<div class="text-[11px] text-gray-500 mt-1">Last saved: ${d.savedAt ? new Date(d.savedAt).toLocaleString() : "—"}</div>`,
+          ].join("");
+
+          // Pre-fill channel from saved config
+          if (d.channel) {
+            const ch = document.getElementById("f-channel");
+            if (ch) ch.value = d.channel;
+          }
+        } catch {
+          // Blobs not available locally (dev) — just hide status card
+        }
+      }
+
+      // Toggle secret visibility
+      document.getElementById("toggle-secret")?.addEventListener("click", () => {
+        const inp = document.getElementById("f-client-secret");
+        const btn = document.getElementById("toggle-secret");
+        if (!inp) return;
+        const showing = inp.type === "text";
+        inp.type = showing ? "password" : "text";
+        btn.textContent = showing ? "Show" : "Hide";
+      });
+
+      // Connect button
+      document.getElementById("connect-btn")?.addEventListener("click", async () => {
+        const clientId     = document.getElementById("f-client-id")?.value.trim();
+        const clientSecret = document.getElementById("f-client-secret")?.value.trim();
+        const channel      = document.getElementById("f-channel")?.value.trim();
+        const notifySecret = document.getElementById("f-notify-secret")?.value.trim();
+        const discord      = document.getElementById("f-discord")?.value.trim();
+
+        const errEl = document.getElementById("form-error");
+        errEl.classList.add("hidden");
+
+        if (!clientId || !clientSecret || !channel) {
+          errEl.textContent = "Client ID, Client Secret, and Channel are all required.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+
+        const btn     = document.getElementById("connect-btn");
+        const btnText = document.getElementById("connect-btn-text");
+        const spinner = document.getElementById("connect-btn-spinner");
+        btn.disabled = true;
+        btnText.textContent = "Connecting…";
+        spinner.classList.remove("hidden");
+
+        try {
+          const r = await fetch(API, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({
+              clientId, clientSecret, channel,
+              notifySecret: notifySecret || null,
+              discordWebhook: discord || null,
+            }),
+          });
+          const d = await r.json();
+
+          if (!r.ok || !d.ok) {
+            throw new Error(d.error || `Server error ${r.status}`);
+          }
+
+          // Show success
+          document.getElementById("success-card")?.classList.remove("hidden");
+          document.getElementById("success-card")?.classList.add("pulse-once");
+
+          const successRows = document.getElementById("success-rows");
+          if (successRows) {
+            successRows.innerHTML = [
+              statusRow("Twitch credentials", true, "validated against Twitch API"),
+              statusRow("Channel", true, d.channel),
+              statusRow("Live right now", d.live, d.live ? "🔴 You're LIVE!" : "Currently offline"),
+              notifySecret ? statusRow("Notify Secret", true, "saved") : "",
+              discord ? statusRow("Discord Webhook", true, "saved") : "",
+            ].join("");
+          }
+
+          // Refresh status card
+          loadStatus();
+
+          btnText.textContent = "Saved ✓";
+          btn.classList.replace("bg-twitch", "bg-green-700");
+          btn.classList.replace("hover:bg-twitch/90", "hover:bg-green-600");
+        } catch (err) {
+          errEl.textContent = err.message;
+          errEl.classList.remove("hidden");
+          btnText.textContent = "Connect Everything";
+          btn.disabled = false;
+        } finally {
+          spinner.classList.add("hidden");
+        }
+      });
+
+      // Load on start
+      loadStatus();
+
+      // Also allow Enter key on any input to submit
+      document.querySelectorAll("input").forEach((inp) => {
+        inp.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") document.getElementById("connect-btn")?.click();
+        });
+      });
+    </script>
+  </body>
+</html>

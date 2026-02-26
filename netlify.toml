@@ -131,3 +131,9 @@
   from = "/widget/:style"
   to = "/widget-embed.html?style=:style"
   status = 200
+
+# Setup / connect-everything wizard
+[[redirects]]
+  from = "/setup"
+  to = "/setup.html"
+  status = 200
